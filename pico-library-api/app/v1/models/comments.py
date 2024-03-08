@@ -1,6 +1,5 @@
-from . import Base
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Enum
-from sqlalchemy.orm import relationship
+from app.v1 import db
+
 
 import enum
 from datetime import datetime
@@ -18,21 +17,21 @@ class CommentType(enum.Enum):
     REVIEW = "review"
 
 
-class CommentVote(Base):
+class CommentVote(db.Model):
     """
     A vote on a comment.
     """
 
     __tablename__ = "comment_votes"
-    id = Column(Integer, primary_key=True)
-    vote_type = Column(Enum(CommentVoteType), nullable=False)
-    created_at = Column(DateTime, default=datetime.now)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-    comment_id = Column(Integer, ForeignKey("comments.id", ondelete="CASCADE"))
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    id = db.Column(db.Integer, primary_key=True)
+    vote_type = db.Column(db.Enum(CommentVoteType), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+    comment_id = db.Column(db.Integer, db.ForeignKey("comments.id", ondelete="CASCADE"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
 
-    comment = relationship("Comment", backref="comment_votes")
-    user = relationship("User", backref="comment_votes")
+    comment = db.relationship("Comment", backref="comment_votes")
+    user = db.relationship("User", backref="comment_votes")
 
     def __repr__(self):
         return f"<CommentVote {self.id}>"
@@ -46,24 +45,25 @@ class CommentVote(Base):
 ondelete = "CASCADE"
 
 
-class Comment(Base):
+class Comment(db.Model):
     """
     A comment on a book.
     """
-    __tablename__ = "comments"
-    id = Column(Integer, primary_key=True)
-    content = Column(Text)
-    created_at = Column(DateTime)
-    updated_at = Column(DateTime)
-    type = Column(Enum(CommentType), nullable=False)
-    book_id = Column(Integer, ForeignKey("books.id", ondelete="CASCADE"))
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
-    parent_id = Column(Integer, ForeignKey("comments.id", ondelete="CASCADE"))
 
-    book = relationship("Book", backref="comments")
-    user = relationship("User", backref="comments")
-    parent = relationship("Comment", remote_side=[id], backref="replies")
-    replies = relationship("Comment", backref="parent")
+    __tablename__ = "comments"
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text)
+    created_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime)
+    type = db.Column(db.Enum(CommentType), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey("books.id", ondelete="CASCADE"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
+    parent_id = db.Column(db.Integer, db.ForeignKey("comments.id", ondelete="CASCADE"))
+
+    book = db.relationship("Book", backref="comments")
+    user = db.relationship("User", backref="comments")
+    parent = db.relationship("Comment", remote_side=[id], backref="replies")
+    replies = db.relationship("Comment", backref="parent")
 
     def __repr__(self):
         return f"<Comment {self.id}>"

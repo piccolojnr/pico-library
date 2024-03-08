@@ -1,11 +1,9 @@
-from sqlalchemy import  Column, Integer, String, DateTime,Enum
-from sqlalchemy.orm import relationship
-from . import Base
+from app.v1 import db
 
 from datetime import datetime
 import enum
 
-class Gender(enum.Enum):
+class UserGender(enum.Enum):
     """
     
     """
@@ -13,23 +11,23 @@ class Gender(enum.Enum):
     FEMALE = 'female'
     OTHER = 'other'
     
-class User(Base):
+class User(db.Model):
     """
     User model
     """
     __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    email = Column(String)
-    gender = Column(Enum(Gender))
-    password_hash = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    last_logged_in = Column(DateTime, default=datetime.utcnow)
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String)
+    gender = db.Column(db.Enum(UserGender))
+    password_hash = db.Column(db.String)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    last_logged_in = db.Column(db.DateTime, default=datetime.utcnow)
     
-    profile = relationship('Profile', back_populates='user')
-    bookmarks = relationship('Bookmark', back_populates='user')
-    comments = relationship('Comment', back_populates='user')
-    comment_votes = relationship('CommentVote', back_populates='user')
-    ratings = relationship('Rating', back_populates='user')
+    profile = db.relationship('Profile', back_populates='user')
+    bookmarks = db.relationship('Bookmark', back_populates='user')
+    comments = db.relationship('Comment', back_populates='user')
+    comment_votes = db.relationship('CommentVote', back_populates='user')
+    ratings = db.relationship('Rating', back_populates='user')
     
     def __repr__(self):
         return f"<User {self.email}>"

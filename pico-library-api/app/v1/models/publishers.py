@@ -1,25 +1,22 @@
-from . import Base
-
-from sqlalchemy import Column, Integer, String, ForeignKey, Table, PrimaryKeyConstraint
-from sqlalchemy.orm import relationship
+from app.v1 import db
 
 
-book_publishers_association = Table(
+book_publishers_association = db.Table(
     "book_publishers",
-    Base.metadata,
-    Column("book_id", Integer, ForeignKey("books.id", ondelete="CASCADE")),
-    Column("publisher_id", String, ForeignKey("publishers.name", ondelete="CASCADE")),
-    PrimaryKeyConstraint("book_id", "publisher_id"),
+    
+    db.Column("book_id", db.Integer, db.ForeignKey("books.id", ondelete="CASCADE")),
+    db.Column("publisher_id", db.String, db.ForeignKey("publishers.name", ondelete="CASCADE")),
+    db.PrimaryKeyConstraint("book_id", "publisher_id"),
 )
 
-class Publisher(Base):
+class Publisher(db.Model):
     """
     Publisher model
     """
     __tablename__ = "publishers"
-    name = Column(String, primary_key=True)
+    name = db.Column(db.String, primary_key=True)
 
-    books = relationship("Book", secondary=book_publishers_association, back_populates="publishers")
+    books = db.relationship("Book", secondary=book_publishers_association, back_populates="publishers")
 
     def __repr__(self):
         return f"<Publisher(name={self.name})>"

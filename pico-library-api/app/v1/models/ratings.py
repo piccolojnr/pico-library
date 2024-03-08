@@ -1,20 +1,17 @@
-from . import Base
-
-from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Float, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import relationship
+from app.v1 import db
 
 
-class Rating(Base):
+class Rating(db.Model):
     """
     Rating model
     """
     __tablename__ = 'ratings'
-    user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), primary_key=True)
-    book_id = Column(Integer, ForeignKey('books.id', ondelete="CASCADE"), primary_key=True)
-    rating = Column(Float)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"), primary_key=True)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id', ondelete="CASCADE"), primary_key=True)
+    rating = db.Column(db.Float)
 
-    user = relationship('User', back_populates='ratings')
-    book = relationship('Book', back_populates='ratings')
+    user = db.relationship('User', back_populates='ratings')
+    book = db.relationship('Book', back_populates='ratings')
     
     def __repr__(self):
         return f'<Rating {self.user_id} {self.book_id} {self.rating}>'

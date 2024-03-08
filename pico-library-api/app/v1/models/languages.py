@@ -1,27 +1,29 @@
-from . import Base
-from sqlalchemy import Column, Integer, String,ForeignKey,Table, PrimaryKeyConstraint
-from sqlalchemy.orm import relationship
+from app.v1 import db
 
-book_languages_association = Table(
-    'book_languages',
-    Base.metadata,
-    Column('book_id', Integer, ForeignKey('books.id', ondelete="CASCADE")),
-    Column('language_id', Integer, ForeignKey('languages.id', ondelete="CASCADE")),
-    PrimaryKeyConstraint('book_id', 'language_id')
+
+book_languages_association = db.Table(
+    "book_languages",
+    db.Column("book_id", db.Integer, db.ForeignKey("books.id", ondelete="CASCADE")),
+    db.Column(
+        "language_id", db.String, db.ForeignKey("languages.code", ondelete="CASCADE")
+    ),
+    db.PrimaryKeyConstraint("book_id", "language_id"),
 )
 
 
-class Language(Base):
+class Language(db.Model):
     """
     Language model
     """
-    __tablename__ = 'languages'
-    code = Column(String, primary_key=True)
-    
-    books = relationship("Book", secondary=book_languages_association, back_populates="languages")
-    
+    __tablename__ = "languages"
+    code = db.Column(db.String, primary_key=True)
+
+    books = db.relationship(
+        "Book", secondary=book_languages_association, back_populates="languages"
+    )
+
     def __repr__(self):
         return f"<Language {self.code}>"
-    
+
     def __init__(self, code):
         self.code = code

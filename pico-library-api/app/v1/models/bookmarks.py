@@ -1,35 +1,42 @@
-from . import Base
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum
-from sqlalchemy.orm import relationship
+from app.v1 import db
+
 from datetime import datetime
 import enum
 
-class Status(enum.Enum):
+
+class BookmarkStatus(enum.Enum):
     """
     Bookmark status
     """
-    READ = 'read'
-    UNREAD = 'unread'
-    WANT_TO_READ = 'want to read'
-    CURRENTLY_READING = 'currently reading'
 
-class Bookmark(Base):
+    READ = "read"
+    UNREAD = "unread"
+    WANT_TO_READ = "want to read"
+    CURRENTLY_READING = "currently reading"
+
+
+class Bookmark(db.Model):
     """
     Bookmark model
     """
-    __tablename__ = 'bookmarks'
-    user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), primary_key=True)
-    book_id = Column(Integer, ForeignKey('books.id', ondelete="CASCADE"), primary_key=True)
-    status = Column(Enum(Status), nullable=False, default=Status.UNREAD)
-    last_read = Column(DateTime)
-    created_at = Column(DateTime, default=datetime.utcnow)
 
-    user = relationship('User', back_populates='bookmarks')
-    book = relationship('Book', back_populates='bookmarks')
-    
+    __tablename__ = "bookmarks"
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    book_id = db.Column(
+        db.Integer, db.ForeignKey("books.id", ondelete="CASCADE"), primary_key=True
+    )
+    status = db.Column(db.Enum(BookmarkStatus), nullable=False, default=BookmarkStatus.UNREAD)
+    last_read = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship("User", back_populates="bookmarks")
+    book = db.relationship("Book", back_populates="bookmarks")
+
     def __repr__(self):
-        return f'<Bookmark {self.book_id} {self.status}>'
-    
+        return f"<Bookmark {self.book_id} {self.status}>"
+
     def __init__(self, user_id, book_id, status, last_read):
         self.user_id = user_id
         self.book_id = book_id

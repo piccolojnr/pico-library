@@ -1,25 +1,22 @@
-from . import Base
-
-from sqlalchemy.orm import relationship
-from sqlalchemy import  Column, Integer, String, Text, DateTime,ForeignKey
+from app.v1 import db
 
 from datetime import datetime
 
-class Profile(Base):
+class Profile(db.Model):
     """
     Profile model
     """
     __tablename__ = 'profile'
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"))
-    full_name = Column(String)
-    bio = Column(Text)
-    occupation = Column(String)
-    location = Column(String)
-    profile_image = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"))
+    full_name = db.Column(db.String)
+    bio = db.Column(db.Text)
+    occupation = db.Column(db.String)
+    location = db.Column(db.String)
+    profile_image = db.Column(db.String)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    user = relationship('User', back_populates='profile')
+    user = db.relationship('User', back_populates='profile')
     
     def __repr__(self):
         return f"<Profile {self.id}>"
