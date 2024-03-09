@@ -7,7 +7,13 @@ from .languages import book_languages_association
 from .publishers import book_publishers_association
 from .subjects import book_subjects_association
 from .resources import book_resource_association
-from datetime import datetime
+from datetime import timezone
+from app.v1.util.datetime_util import (
+    make_tzaware,
+    utc_now,
+    localized_dt_string,
+    get_local_utcoffset,
+)
 
 
 class Book(db.Model):
@@ -22,7 +28,7 @@ class Book(db.Model):
     description = db.Column(db.Text)
     downloads = db.Column(db.Integer)
     license = db.Column(db.String)
-    date_created = db.Column(db.DateTime, default=datetime.utcnow)
+    date_created = db.Column(db.DateTime, default=utc_now)
 
     bookshelves = db.relationship(
         "Bookshelf", secondary=book_bookshelves_association, back_populates="books"
@@ -60,16 +66,11 @@ class Book(db.Model):
         return self.comments.filter(Comment.type == CommentType.REVIEW)
 
     @hybrid_property
-    def date_created_string(self):
-        return self.date_created.strftime("%Y-%m-%d")
-    
+    def date_created_str(self):
+        date_created_utc = make_tzaware(
+            self.date_created, use_tz=timezone.utc, localize=False
+        )
+        return localized_dt_string(date_created_utc, use_tz=get_local_utcoffset())
+
     def __repr__(self):
         return f"<Book {self.title}>"
-
-    # def __init__(self, id, format, title, description, downloads, license):
-    #     self.id = id
-    #     self.format = format
-    #     self.title = title
-    #     self.description = description
-    #     self.downloads = downloads
-    #     self.license = license
