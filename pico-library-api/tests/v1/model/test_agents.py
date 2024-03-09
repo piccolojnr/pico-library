@@ -2,8 +2,8 @@ def test_create_agent_type(agent_type_factory, db_session):
     agent_type = agent_type_factory.create()
     db_session.add(agent_type)
     db_session.commit()
-
     assert agent_type.name is not None
+
 
 def test_create_agent(agent_factory, db_session):
     agent = agent_factory.create()

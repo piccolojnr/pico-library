@@ -10,6 +10,7 @@ from app.v1.models.ratings import Rating
 from app.v1.models.resources import Resource, ResourceType
 from app.v1.models.subjects import Subject
 from app.v1.models.users import User, UserGender
+from app.v1.models.token_blacklist import BlacklistedToken
 
 __all__ = [
     "Agent",
@@ -31,4 +32,6 @@ __all__ = [
     "Subject",
     "User",
     "UserGender",
+    "BlacklistedToken",
 ]
+__version__ = "1.0.0"

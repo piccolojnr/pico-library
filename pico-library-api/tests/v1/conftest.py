@@ -43,6 +43,27 @@ def db_session(app):
 
 
 @pytest.fixture
+def user_factory(db_session):
+    class UserFactory(factory.Factory):
+        class Meta:
+            model = User
+
+        email = factory.Faker("email")
+        password_hash = factory.Faker("password")
+        gender = factory.Faker("random_element", elements=UserGender.MALE)
+
+    return UserFactory
+
+
+@pytest.fixture
+def user(db_session, user_factory):
+    user = user_factory.create()
+    db_session.add(user)
+    db_session.commit()
+    return user
+
+
+@pytest.fixture
 def book_factory(db_session):
     class BookFactory(factory.Factory):
         class Meta:
