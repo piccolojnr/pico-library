@@ -15,9 +15,10 @@ bcrypt = Bcrypt()
 def create_app(config_name):
     app = Flask("pico-library-api")
     app.config.from_object(get_config(config_name))
-    
+
     cors.init_app(app)
     db.init_app(app)
     migrate.init_app(app)
     bcrypt.init_app(app)
+
     return app

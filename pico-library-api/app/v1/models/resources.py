@@ -24,8 +24,7 @@ class ResourceType(db.Model):
     
     """
     __tablename__ = "resource_type"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, unique=True)
+    name = db.Column(db.String,primary_key=True)
 
     resources = db.relationship("Resource", back_populates="type")
 
@@ -36,21 +35,21 @@ class Resource(db.Model):
     
     """
     __tablename__ = "resources"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     url = db.Column(db.String, unique=True)
     size = db.Column(db.Integer)
     modified = db.Column(db.DateTime)
-    type_id = db.Column(db.Integer, db.ForeignKey("resource_type.id", ondelete="CASCADE"))
+    type_name = db.Column(db.String, db.ForeignKey("resource_type.name", ondelete="CASCADE"))
 
     type = db.relationship("ResourceType", back_populates="resources")
     books = db.relationship("Book", secondary=book_resource_association, back_populates="resources")
-    __table_args__ = (db.UniqueConstraint("url", "type_id"),)
+    __table_args__ = (db.UniqueConstraint("url", "type_name"),)
 
     def __repr__(self):
         return f"<Resource {self.url}>"
     
-    def __init__(self, url, size, modified, type_id):
+    def __init__(self, url, size, modified, type_name):
         self.url = url
         self.size = size
         self.modified = modified
-        self.type_id = type_id
+        self.type_name = type_name

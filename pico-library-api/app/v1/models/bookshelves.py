@@ -18,7 +18,7 @@ class Bookshelf(db.Model):
     """
 
     __tablename__ = "bookshelves"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String, unique=True)
 
     books = db.relationship(

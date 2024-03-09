@@ -42,9 +42,9 @@ class Book(db.Model):
     resources = db.relationship(
         "Resource", secondary=book_resource_association, back_populates="books"
     )
-    ratings = db.relationship("Rating", secondary="ratings")
-    comments = db.relationship("Comment", secondary="comments")
-    bookmarks = db.relationship("Bookmark", secondary="bookmarks")
+    ratings = db.relationship("Rating", back_populates="book")
+    comments = db.relationship("Comment", back_populates="book")
+    bookmarks = db.relationship("Bookmark", back_populates="book")
 
     @hybrid_property
     def average_rating(self):
@@ -59,13 +59,17 @@ class Book(db.Model):
 
         return self.comments.filter(Comment.type == CommentType.REVIEW)
 
+    @hybrid_property
+    def date_created_string(self):
+        return self.date_created.strftime("%Y-%m-%d")
+    
     def __repr__(self):
         return f"<Book {self.title}>"
 
-    def __init__(self, id, format, title, description, downloads, license):
-        self.id = id
-        self.format = format
-        self.title = title
-        self.description = description
-        self.downloads = downloads
-        self.license = license
+    # def __init__(self, id, format, title, description, downloads, license):
+    #     self.id = id
+    #     self.format = format
+    #     self.title = title
+    #     self.description = description
+    #     self.downloads = downloads
+    #     self.license = license

@@ -8,6 +8,7 @@ class Rating(db.Model):
     __tablename__ = 'ratings'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"), primary_key=True)
     book_id = db.Column(db.Integer, db.ForeignKey('books.id', ondelete="CASCADE"), primary_key=True)
+    created_at = db.Column(db.DateTime, default=db.func.now())
     rating = db.Column(db.Float)
 
     user = db.relationship('User', back_populates='ratings')

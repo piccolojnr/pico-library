@@ -3,8 +3,7 @@ from app.v1 import db
 
 class AgentType(db.Model):
     __tablename__ = "agent_type"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    name = db.Column(db.String, unique=True, primary_key=True)
 
 
 book_agents_association = db.Table(
@@ -26,7 +25,7 @@ class Agent(db.Model):
     birth_date = db.Column(db.String)
     death_date = db.Column(db.String)
     webpage = db.Column(db.String)
-    type_id = db.Column(db.Integer, db.ForeignKey("agent_type.id", ondelete="CASCADE"))
+    type_name = db.Column(db.String, db.ForeignKey("agent_type.name", ondelete="CASCADE"), nullable=False)
 
     type = db.relationship("AgentType")
     books = db.relationship(
@@ -36,10 +35,10 @@ class Agent(db.Model):
     def __repr__(self):
         return f"<Agent {self.name}>"
 
-    def __init__(self, name, alias, birth_date, death_date, webpage, type_id):
+    def __init__(self, name, alias, birth_date, death_date, webpage, type_name):
         self.name = name
         self.alias = alias
         self.birth_date = birth_date
         self.death_date = death_date
         self.webpage = webpage
-        self.type_id = type_id
+        self.type_name = type_name

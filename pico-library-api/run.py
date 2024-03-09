@@ -4,9 +4,7 @@ import os
 
 app = create_app(os.environ.get("FLASK_ENV", "development"))
 
-app.shell_context_processor
-
-
+@app.shell_context_processor
 def make_shell_context():
     dict_ = {}
     for model in __all__:

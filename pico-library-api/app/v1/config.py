@@ -1,7 +1,10 @@
 """Config settings for for development, testing and production environments."""
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
+
+load_dotenv()
 POSTSQL_DB = os.environ.get("POSTSQL_DB")
 POSTSQL_USER = os.environ.get("POSTSQL_USER")
 POSTSQL_PASSWORD = os.environ.get("POSTSQL_PASSWORD")

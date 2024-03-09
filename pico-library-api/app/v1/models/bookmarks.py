@@ -37,7 +37,7 @@ class Bookmark(db.Model):
     def __repr__(self):
         return f"<Bookmark {self.book_id} {self.status}>"
 
-    def __init__(self, user_id, book_id, status, last_read):
+    def __init__(self, user_id, book_id, status, last_read=None):
         self.user_id = user_id
         self.book_id = book_id
         self.status = status
