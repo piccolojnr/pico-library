@@ -2,6 +2,7 @@ from app.v1 import create_app, db
 from app.v1.models import User, Book
 import os
 
+
 app = create_app(os.environ.get("FLASK_ENV", "development"))
 
 

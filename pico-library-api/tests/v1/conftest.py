@@ -27,19 +27,19 @@ from app.v1.models import (
 import factory
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def app():
     app = create_app("testing")
     return app
 
 
-@pytest.fixture(scope="session")
-def db_session(app):
+@pytest.fixture
+def db_session(app, request):
     with app.app_context():
-        database.create_all()
-        yield database.session
-        database.session.remove()
         database.drop_all()
+        database.create_all()
+        database.session.commit()
+        return database
 
 
 @pytest.fixture
@@ -50,7 +50,6 @@ def user_factory(db_session):
 
         email = factory.Faker("email")
         password_hash = factory.Faker("password")
-        gender = factory.Faker("random_element", elements=UserGender.MALE)
 
     return UserFactory
 
@@ -306,11 +305,11 @@ def profile_factory(db_session, user_factory):
             model = Profile
 
         user_id = user.id
-        full_name = factory.Faker("name")
+        gender = factory.Faker("random_element", elements=UserGender.MALE)
+        first_name = factory.Faker("name")
+        last_name = factory.Faker("name")
         location = factory.Faker("city")
         bio = factory.Faker("sentence", nb_words=4)
-        avatar = factory.Faker("url")
-        cover = factory.Faker("url")
 
     return ProfileFactory
 

@@ -1,4 +1,5 @@
 """Config settings for for development, testing and production environments."""
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -43,8 +44,12 @@ class Config:
 
     SECRET_KEY = os.getenv("SECRET_KEY", "open sesame")
     BCRYPT_LOG_ROUNDS = 4
+
     TOKEN_EXPIRE_HOURS = 0
     TOKEN_EXPIRE_MINUTES = 0
+    JWT_AUTHMAXAGE = 0
+    JWT_REFRESHMAXAGE = 0
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     SWAGGER_UI_DOC_EXPANSION = "list"
@@ -56,6 +61,8 @@ class TestingConfig(Config):
     """Testing configuration."""
 
     TESTING = True
+    JWT_AUTHMAXAGE = 5
+    JWT_REFRESHMAXAGE = 10
     SQLALCHEMY_DATABASE_URI = POSTSQL_TEST
 
 
@@ -63,6 +70,8 @@ class DevelopmentConfig(Config):
     """Development configuration."""
 
     TOKEN_EXPIRE_MINUTES = 15
+    JWT_AUTHMAXAGE = 900
+    JWT_REFRESHMAXAGE = 3600
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", POSTSQL_DEV)
 
 
@@ -71,6 +80,8 @@ class ProductionConfig(Config):
 
     TOKEN_EXPIRE_HOURS = 1
     BCRYPT_LOG_ROUNDS = 13
+    JWT_AUTHMAXAGE = 3600
+    JWT_REFRESHMAXAGE = 604800
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", POSTSQL_PROD)
     PRESERVE_CONTEXT_ON_EXCEPTION = True
 

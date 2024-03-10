@@ -4,12 +4,12 @@ from app.v1.models.books import Book
 from app.v1.models.bookshelves import Bookshelf
 from app.v1.models.comments import Comment, CommentType, CommentVote, CommentVoteType
 from app.v1.models.languages import Language
-from app.v1.models.profile import Profile
+from app.v1.models.profile import Profile, UserGender
 from app.v1.models.publishers import Publisher
 from app.v1.models.ratings import Rating
 from app.v1.models.resources import Resource, ResourceType
 from app.v1.models.subjects import Subject
-from app.v1.models.users import User, UserGender
+from app.v1.models.users import User
 from app.v1.models.token_blacklist import BlacklistedToken
 
 __all__ = [
