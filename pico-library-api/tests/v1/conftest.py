@@ -27,19 +27,19 @@ from app.v1.models import (
 import factory
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def app():
     app = create_app("testing")
     return app
 
 
-@pytest.fixture
-def db_session(app, request):
+@pytest.fixture(scope="session")
+def db_session(app):
     with app.app_context():
-        database.drop_all()
         database.create_all()
-        database.session.commit()
-        return database
+        yield database.session
+        database.session.remove()
+        database.drop_all()
 
 
 @pytest.fixture
@@ -49,7 +49,7 @@ def user_factory(db_session):
             model = User
 
         email = factory.Faker("email")
-        password_hash = factory.Faker("password")
+        password = factory.Faker("password")
 
     return UserFactory
 
@@ -183,19 +183,6 @@ def subject_factory(db_session):
 
 
 @pytest.fixture
-def user_factory(db_session):
-    class UserFactory(factory.Factory):
-        class Meta:
-            model = User
-
-        email = factory.Faker("email")
-        password_hash = factory.Faker("password")
-        gender = factory.Faker("random_element", elements=UserGender)
-
-    return UserFactory
-
-
-@pytest.fixture
 def bookmark_factory(db_session, user_factory, book_factory):
     user = user_factory.create()
     book = book_factory.create()
@@ -305,7 +292,7 @@ def profile_factory(db_session, user_factory):
             model = Profile
 
         user_id = user.id
-        gender = factory.Faker("random_element", elements=UserGender.MALE)
+        gender = factory.Faker("random_element", elements=UserGender)
         first_name = factory.Faker("name")
         last_name = factory.Faker("name")
         location = factory.Faker("city")
