@@ -2,16 +2,18 @@ from app.v1 import db, bcrypt, auth_manager
 from flask import current_app
 from sqlalchemy.ext.hybrid import hybrid_property
 from uuid import uuid4
-from datetime import timedelta, timezone, datetime
+from datetime import timezone
 from app.v1.util.datetime_util import (
     get_local_utcoffset,
     localized_dt_string,
     make_tzaware,
     utc_now,
 )
-import enum
 
 from app.v1.models.token_blacklist import BlacklistedToken
+from flask_pyjwt import JWT
+from flask_restx import abort
+import datetime
 
 
 class User(db.Model):
@@ -65,6 +67,10 @@ class User(db.Model):
     def find_by_email(email):
         return User.query.filter_by(email=email).first()
 
+    @staticmethod
+    def find_by_public_id(public_id):
+        return User.query.filter_by(public_id=public_id).first()
+
     def encode_auth_token(self):
         """
         Generates the Auth Token
@@ -72,8 +78,8 @@ class User(db.Model):
         """
         try:
 
-            auth_token = auth_manager.auth_token(self.public_id, self.email)
-            refresh_token = auth_manager.refresh_token(self.public_id)
+            auth_token = self.generate_auth_token()
+            refresh_token = self.generate_refresh_token()
             return dict(
                 auth_token=auth_token.signed,
                 refresh_token=refresh_token.signed,
@@ -82,74 +88,39 @@ class User(db.Model):
         except Exception as e:
             return e
 
-    # @staticmethod
-    # def decode_auth_token(auth_token):
-    #     """
-    #     Decodes the auth token
-    #     :param auth_token:
-    #     :return: integer|string
-    #     """
-    #     if isinstance(auth_token, bytes):
-    #         auth_token = auth_token.decode(encoding="utf-8", errors="strict")
-    #     if auth_token.startswith("Bearer "):
-    #         auth_token = auth_token[7:]
-    #     try:
-    #         payload = jwt.decode(
-    #             auth_token, current_app.config.get("SECRET_KEY"), algorithms=["HS256"]
-    #         )
-    #         if BlacklistedToken.check_blacklist(auth_token):
-    #             return dict(
-    #                 success=False, error="Token blacklisted. Please log in again."
-    #             )
-    #         return dict(
-    #             success=True,
-    #             public_id=payload["sub"],
-    #             token=auth_token,
-    #             expires_at=payload["exp"],
-    #         )
-    #     except jwt.ExpiredSignatureError:
-    #         return dict(
-    #             success=False,
-    #             error="Signature expired. Please log in again.",
-    #         )
-    #     except jwt.InvalidTokenError:
-    #         return dict(success=False, error="Invalid token. Please log in again.")
-    #     except Exception as e:
-    #         return dict(success=False, error=str(e))
+    def generate_auth_token(self):
+        """
+        Generates the Auth Token
+        :return: string
+        """
+        return auth_manager.auth_token(self.public_id, self.email)
 
-    # @classmethod
-    # def blacklist_token(cls, auth_token):
-    #     """
-    #     Adds a token to the blacklist
-    #     :param token: string
-    #     :return: Response
-    #     """
-    #     try:
-    #         decoded_token = cls.decode_auth_token(auth_token)
-    #         if decoded_token["success"]:
-    #             token = decoded_token["token"]
-    #             expires_at = decoded_token["expires_at"]
-    #             blacklist_token = BlacklistedToken(token=token, expires_at=expires_at)
-    #             db.session.add(blacklist_token)
-    #             db.session.commit()
-    #             return dict(success=True)
-    #         else:
-    #             return dict(success=False, error=decoded_token["error"])
-    #     except Exception as e:
-    #         return dict(success=False, error=str(e))
+    def generate_refresh_token(self):
+        """
+        Generates the Refresh Token
+        :return: string
+        """
+        return auth_manager.refresh_token(self.public_id)
 
-    # @staticmethod
-    # def get_user_by_token(token):
-    #     """
-    #     Get user by token
-    #     :param token:
-    #     :return: User
-    #     """
-    #     decoded_token = User.decode_auth_token(token)
-    #     if decoded_token["success"]:
-    #         public_id = decoded_token["public_id"]
-    #         return User.query.filter_by(public_id=public_id).first()
-    #     return None
+    @classmethod
+    def blacklist_token(cls, auth_token: JWT):
+        """
+        Adds a token to the blacklist
+        :param token: string
+        :return: Response
+        """
+        try:
+            if auth_token:
+                blacklist_token = BlacklistedToken(
+                    token=auth_token.signed, expires_at=auth_token.exp
+                )
+                db.session.add(blacklist_token)
+                db.session.commit()
+                return dict(success=True)
+            else:
+                return dict(success=False, error="Invalid token")
+        except Exception as e:
+            return dict(success=False, error=str(e))
 
     def __repr__(self):
         return f"<User {self.email}>"

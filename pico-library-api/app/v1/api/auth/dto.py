@@ -14,6 +14,7 @@ auth_register_reqparser.add_argument(
     "email",
     type=email(),
     required=True,
+    location="form",
     help="Email required" "first_name",
 )
 auth_register_reqparser.add_argument(
@@ -37,4 +38,21 @@ auth_register_reqparser.add_argument(
     required=True,
     location="form",
     help="Gender required",
+)
+
+
+auth_login_reqparser = RequestParser(bundle_errors=True)
+auth_login_reqparser.add_argument(
+    "password",
+    type=str,
+    required=True,
+    location="form",
+    help="Password required",
+)
+auth_login_reqparser.add_argument(
+    "email",
+    type=email(),
+    required=True,
+    location="form",
+    help="Email required",
 )

@@ -1,8 +1,7 @@
 from http import HTTPStatus
-import re
 from flask import jsonify, current_app
 from app.v1 import db
-from flask_restx import abort, marshal
+from flask_restx import abort
 from app.v1.models import User, Profile, UserGender
 
 
@@ -10,7 +9,7 @@ def process_registeration_reguest(email, password, first_name, last_name, gender
     if User.find_by_email(email):
         abort(HTTPStatus.BAD_REQUEST, "User already exists")
 
-    new_user: User = User(email=email, password_hash=password)
+    new_user: User = User(email=email, password=password)
     db.session.add(new_user)
     db.session.flush()
 
@@ -45,11 +44,11 @@ def process_login_request(email, password):
 
     user: User = User.find_by_email(email)
     if user and user.check_password(password):
-        access_token = user.encode_auth_token()
+        auth = user.encode_auth_token()
         response = jsonify(
             status="success",
             message="Logged in successfully",
-            access_token=access_token.decode(),
+            auth=auth,
             token_type="Bearer",
             expires_in=_get_token_expire_time(),
         )
@@ -62,22 +61,30 @@ def process_login_request(email, password):
         return None
 
 
-def process_logout_request(user):
+def process_logout_request(current_token_data):
+    public_id = current_token_data.sub
+    user: User = User.find_by_public_id(public_id)
     if user:
-        user.logout()
-        db.session.commit()
-        return jsonify({"message": "Logged out successfully"})
+        res = user.blacklist_token(current_token_data)
+        if res["success"]:
+            return jsonify({"message": "Logged out successfully"})
+        else:
+            abort(HTTPStatus.BAD_REQUEST, "Invalid token")
+            return None
     else:
         abort(HTTPStatus.UNAUTHORIZED, "User not found")
         return None
 
 
-def process_refresh_token_request(user):
-    if user:
-        token = user.generate_auth_token(user.id)
-        return jsonify
+def process_refresh_token_request(current_token_data):
+    public_id = current_token_data.sub
+    user: User = User.find_by_public_id(public_id)
 
-    return None
+    if not user:
+        abort(HTTPStatus.UNAUTHORIZED, "User not found")
+    auth_token = user.generate_auth_token().signed
+
+    return jsonify(message="token refreshed", auth_token=auth_token)
 
 
 def _get_token_expire_time():

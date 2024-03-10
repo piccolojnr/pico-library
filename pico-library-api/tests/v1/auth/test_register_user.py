@@ -1,41 +1,86 @@
-from tests.v1.util import register_user
+from tests.v1.util import register_user, login_user, logout_user, get_protected_route
 from pprint import pprint
 
 
 def test_register_user(db_session, app, client):
     with app.app_context():
         response = register_user(client)
-        print()
-        pprint(response.json)
-        # assert User.query.count() == 1
-        # user = User.query.first()
-        # assert user.email == 'test@example.com'
-        # assert user.password_hash is not None
-        # assert user.username == 'testuser'
-        # assert user.bio is None
-        # assert user.image is None
-        # assert user.following == 0
-        # assert user.followers == 0
-        # assert user.created_at is not None
-        # assert user.updated_at is not None
+        assert response.status_code == 201
+        assert response.json["message"] == "User registered successfully"
+        assert "auth" in response.json
+        assert (
+            "auth_token" in response.json["auth"]
+            and type(response.json["auth"]["auth_token"]) == str
+        )
+        assert (
+            "refresh_token" in response.json["auth"]
+            and type(response.json["auth"]["refresh_token"]) == str
+        )
+        assert "status" in response.json and response.json["status"] == "success"
+        assert "token_type" in response.json and response.json["token_type"] == "Bearer"
 
 
-#     # assert response.status_code == 201
-#     # assert response.json['message'] == 'User created successfully'
-#     # assert 'token' in response.json
-#     # assert 'user' in response.json
-#     # assert 'id' in response.json['user']
-#     # assert 'email' in response.json['user']
-#     # assert 'password' in response.json['user']
-#     # assert 'username' in response.json['user']
-#     # assert 'bio' in response.json['user']
-#     # assert 'image' in response.json['user']
-#     # assert 'following' in response.json['user']
-#     # assert 'followers' in response.json['user']
-#     # assert 'created_at' in response.json['user']
-#     # assert 'updated_at' in response.json['user']
-#     # assert 'token' in response.json
-#     # assert 'user' in response.json
-#     # assert 'id' in response.json['user']
-#     # assert 'email' in response.json['user']
-#     # assert 'password' in response.json['user']
+def test_login_user(db_session, app, client):
+    with app.app_context():
+        response = register_user(client, email="test@example.com", password="password")
+
+        assert response.status_code == 201
+        assert response.json["message"] == "User registered successfully"
+        assert "auth" in response.json
+        assert (
+            "auth_token" in response.json["auth"]
+            and type(response.json["auth"]["auth_token"]) == str
+        )
+        assert (
+            "refresh_token" in response.json["auth"]
+            and type(response.json["auth"]["refresh_token"]) == str
+        )
+        assert "status" in response.json and response.json["status"] == "success"
+        assert "token_type" in response.json and response.json["token_type"] == "Bearer"
+
+        response = login_user(client, email="test@example.com", password="password")
+        assert response.status_code == 200
+        assert response.json["message"] == "Logged in successfully"
+        assert "auth" in response.json
+        assert (
+            "auth_token" in response.json["auth"]
+            and type(response.json["auth"]["auth_token"]) == str
+        )
+        assert (
+            "refresh_token" in response.json["auth"]
+            and type(response.json["auth"]["refresh_token"]) == str
+        )
+        assert "status" in response.json and response.json["status"] == "success"
+        assert "token_type" in response.json and response.json["token_type"] == "Bearer"
+
+
+def test_logout_user(db_session, app, client):
+    with app.app_context():
+        response = register_user(client, email="test2@example.com", password="password")
+
+        assert response.status_code == 201
+        assert response.json["message"] == "User registered successfully"
+        assert "auth" in response.json
+        assert (
+            "auth_token" in response.json["auth"]
+            and type(response.json["auth"]["auth_token"]) == str
+        )
+        assert (
+            "refresh_token" in response.json["auth"]
+            and type(response.json["auth"]["refresh_token"]) == str
+        )
+        assert "status" in response.json and response.json["status"] == "success"
+        assert "token_type" in response.json and response.json["token_type"] == "Bearer"
+
+        p_response = get_protected_route(client, response.json["auth"]["auth_token"])
+        assert p_response.status_code == 200
+        assert p_response.json["message"] == "You've reached the protected route!"
+
+        log_response = logout_user(client, response.json["auth"]["auth_token"])
+        assert log_response.status_code == 200
+        assert log_response.json["message"] == "Logged out successfully"
+        assert "auth" not in log_response.json
+
+        p_response = get_protected_route(client, response.json["auth"]["auth_token"])
+        assert p_response.status_code == 401
+        assert p_response.json["message"] == "Unauthorized"

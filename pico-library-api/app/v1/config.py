@@ -15,13 +15,13 @@ POSTSQL_SSLMODE = os.environ.get("POSTSQL_SSLMODE")
 HERE = Path(__file__).parent
 
 POSTSQL_DEV = "postgresql://{username}:{password}@{host}:5433/{db}".format(
-    username="piccolo",
+    username="postgres",
     password="hummer64",
     host="localhost",
     db="pico_library_db_dev",
 )
 POSTSQL_TEST = "postgresql://{username}:{password}@{host}:5433/{db}".format(
-    username="piccolo",
+    username="postgres",
     password="hummer64",
     host="localhost",
     db="pico_library_db_test",
