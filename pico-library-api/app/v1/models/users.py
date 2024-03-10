@@ -75,8 +75,8 @@ class User(db.Model):
             auth_token = auth_manager.auth_token(self.public_id, self.email)
             refresh_token = auth_manager.refresh_token(self.public_id)
             return dict(
-                auth_token=auth_token.signed.encode(),
-                refresh_token=refresh_token.signed.encode(),
+                auth_token=auth_token.signed,
+                refresh_token=refresh_token.signed,
             )
 
         except Exception as e:

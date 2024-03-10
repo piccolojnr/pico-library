@@ -43,6 +43,11 @@ def db_session(app):
 
 
 @pytest.fixture
+def client(app):
+    return app.test_client()
+
+
+@pytest.fixture
 def user_factory(db_session):
     class UserFactory(factory.Factory):
         class Meta:

@@ -18,17 +18,6 @@ class RegisterUser(Resource):
     @auth_ns.response(500, "Internal server error")
     @auth_ns.doc(description="Register a new user")
     @auth_ns.doc(security="apikey")
-    @auth_ns.doc(
-        params={"Authorization": {"in": "header", "description": "Bearer token"}}
-    )
-    @auth_ns.doc(
-        params={"Content-Type": {"in": "header", "description": "application/json"}}
-    )
-    @auth_ns.doc(params={"Accept": {"in": "header", "description": "application/json"}})
-    @auth_ns.doc(params={"Accept-Language": {"in": "header", "description": "en-US"}})
-    @auth_ns.doc(
-        params={"Accept-Encoding": {"in": "header", "description": "gzip, deflate, br"}}
-    )
     def post(self):
         request_data = auth_register_reqparser.parse_args()
         email = request_data["email"]

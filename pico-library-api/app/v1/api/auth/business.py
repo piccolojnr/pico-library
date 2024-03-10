@@ -3,7 +3,7 @@ import re
 from flask import jsonify, current_app
 from app.v1 import db
 from flask_restx import abort, marshal
-from app.v1.models import User, Profile
+from app.v1.models import User, Profile, UserGender
 
 
 def process_registeration_reguest(email, password, first_name, last_name, gender):
@@ -12,19 +12,22 @@ def process_registeration_reguest(email, password, first_name, last_name, gender
 
     new_user: User = User(email=email, password_hash=password)
     db.session.add(new_user)
-    db.session.commit()
+    db.session.flush()
 
     new_profile: Profile = Profile(
-        user_id=new_user.id, first_name=first_name, last_name=last_name, gender=gender
+        user_id=new_user.id,
+        first_name=first_name,
+        last_name=last_name,
+        gender=UserGender._value2member_map_[gender],
     )
     db.session.add(new_profile)
     db.session.commit()
 
-    access_token = new_user.encode_auth_token()
+    auth = new_user.encode_auth_token()
     response = jsonify(
         status="success",
         message="User registered successfully",
-        access_token=access_token.decode(),
+        auth=auth,
         token_type="Bearer",
         expires_in=_get_token_expire_time(),
     )

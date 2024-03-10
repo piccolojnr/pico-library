@@ -16,8 +16,8 @@ def test_create_user(db_session, user_factory):
 
 def test_user_encode_auth_token(user):
     auth_: dict[str, bytes] | Exception = user.encode_auth_token()
-    assert isinstance(auth_["auth_token"], bytes)
-    assert isinstance(auth_["refresh_token"], bytes)
+    assert isinstance(auth_["auth_token"], str)
+    assert isinstance(auth_["refresh_token"], str)
 
 
 # def test_auth_token_expires(user):megamind 2
