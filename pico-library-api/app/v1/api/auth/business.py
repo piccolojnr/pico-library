@@ -3,6 +3,7 @@ from flask import jsonify, current_app
 from app.v1 import db
 from flask_restx import abort
 from app.v1.models import User, Profile, UserGender
+from flask_pyjwt import current_token
 
 
 def process_registeration_reguest(email, password, first_name, last_name, gender):
@@ -15,8 +16,8 @@ def process_registeration_reguest(email, password, first_name, last_name, gender
 
     new_profile: Profile = Profile(
         user_id=new_user.id,
-        first_name=first_name,
-        last_name=last_name,
+        first_name=first_name.strip(),
+        last_name=last_name.strip(),
         gender=UserGender._value2member_map_[gender],
     )
     db.session.add(new_profile)
@@ -85,6 +86,17 @@ def process_refresh_token_request(current_token_data):
     auth_token = user.generate_auth_token().signed
 
     return jsonify(message="token refreshed", auth_token=auth_token)
+
+
+def process_change_password(old_password, new_password):
+    user: User = User.find_by_public_id(current_token.sub)
+    if user and user.check_password(old_password):
+        user.password = new_password
+        db.session.commit()
+        return jsonify(message="Password changed successfully")
+    else:
+        abort(HTTPStatus.UNAUTHORIZED, "Invalid credentials")
+        return None
 
 
 def _get_token_expire_time():

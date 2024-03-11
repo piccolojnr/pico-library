@@ -323,3 +323,5 @@ def rating_factory(db_session, user_factory, book_factory):
         rating = factory.Faker("random_int", min=1, max=5)
 
     return RatingFactory
+
+

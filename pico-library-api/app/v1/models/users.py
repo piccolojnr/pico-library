@@ -28,7 +28,7 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=utc_now, nullable=False)
     last_logged_in = db.Column(db.DateTime, default=utc_now)
 
-    profile = db.relationship("Profile", back_populates="user")
+    profile = db.relationship("Profile", uselist=False, back_populates="user")
     bookmarks = db.relationship("Bookmark", back_populates="user")
     comments = db.relationship("Comment", back_populates="user")
     comment_votes = db.relationship("CommentVote", back_populates="user")

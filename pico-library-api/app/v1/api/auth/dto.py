@@ -56,3 +56,19 @@ auth_login_reqparser.add_argument(
     location="form",
     help="Email required",
 )
+
+auth_change_password_reqparser = RequestParser(bundle_errors=True)
+auth_change_password_reqparser.add_argument(
+    "old_password",
+    type=str,
+    required=True,
+    location="form",
+    help="Old password required",
+)
+auth_change_password_reqparser.add_argument(
+    "new_password",
+    type=str,
+    required=True,
+    location="form",
+    help="New password required",
+)
