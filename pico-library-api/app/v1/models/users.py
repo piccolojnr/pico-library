@@ -12,8 +12,6 @@ from app.v1.util.datetime_util import (
 
 from app.v1.models.token_blacklist import BlacklistedToken
 from flask_pyjwt import JWT
-from flask_restx import abort
-import datetime
 
 
 class User(db.Model):
@@ -33,6 +31,14 @@ class User(db.Model):
     comments = db.relationship("Comment", back_populates="user")
     comment_votes = db.relationship("CommentVote", back_populates="user")
     ratings = db.relationship("Rating", back_populates="user")
+    user_subjects = db.relationship(
+        "UserSubject",
+        back_populates="user",
+    )
+    user_bookshelves = db.relationship(
+        "UserBookshelf",
+        back_populates="user",
+    )
 
     public_id = db.Column(db.String, default=lambda: str(uuid4()))
 

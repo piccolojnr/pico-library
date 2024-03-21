@@ -28,7 +28,8 @@ class Book(db.Model):
     description = db.Column(db.Text)
     downloads = db.Column(db.Integer)
     license = db.Column(db.String)
-    date_created = db.Column(db.DateTime, default=utc_now)
+    created_at = db.Column(db.DateTime, default=utc_now)
+    updated_at = db.Column(db.DateTime, default=utc_now, onupdate=utc_now)
 
     bookshelves = db.relationship(
         "Bookshelf", secondary=book_bookshelves_association, back_populates="books"
@@ -66,11 +67,18 @@ class Book(db.Model):
         return self.comments.filter(Comment.type == CommentType.REVIEW)
 
     @hybrid_property
-    def date_created_str(self):
-        date_created_utc = make_tzaware(
-            self.date_created, use_tz=timezone.utc, localize=False
+    def created_at_str(self):
+        created_at_utc = make_tzaware(
+            self.created_at, use_tz=timezone.utc, localize=False
         )
-        return localized_dt_string(date_created_utc, use_tz=get_local_utcoffset())
+        return localized_dt_string(created_at_utc, use_tz=get_local_utcoffset())
+
+    @hybrid_property
+    def updated_at_str(self):
+        updated_at_utc = make_tzaware(
+            self.updated_at, use_tz=timezone.utc, localize=False
+        )
+        return localized_dt_string(updated_at_utc, use_tz=get_local_utcoffset())
 
     def __repr__(self):
         return f"<Book {self.title}>"

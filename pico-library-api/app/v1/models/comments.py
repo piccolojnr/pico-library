@@ -75,13 +75,44 @@ class Comment(db.Model):
     parent = db.relationship("Comment", remote_side=[id], back_populates="replies")
     replies = db.relationship("Comment", back_populates="parent")
     comment_votes = db.relationship("CommentVote", back_populates="comment")
+    ratings = db.relationship("Rating", back_populates="review")
+
+    def rating(self):
+        if not self.ratings:
+            return 0
+        ratings = [rating.rating for rating in self.ratings]
+        return sum(ratings) / len(ratings)
+
+    def upvotes(self):
+        return len(
+            [vote for vote in self.comment_votes if vote.vote == CommentVoteType.UPVOTE]
+        )
+
+    def downvotes(self):
+        return len(
+            [
+                vote
+                for vote in self.comment_votes
+                if vote.vote == CommentVoteType.DOWNVOTE
+            ]
+        )
+
+    @hybrid_property
+    def average_rating(self):
+        if not self.ratings:
+            return 0
+        ratings = [rating.rating for rating in self.ratings]
+        return sum(ratings) / len(ratings)
+
+    @hybrid_property
+    def created_at_str(self):
+        created_str_utc = make_tzaware(self.created_at, timezone.utc, localize=False)
+        return localized_dt_string(created_str_utc, get_local_utcoffset())
+
+    @hybrid_property
+    def updated_at_str(self):
+        updated_str_utc = make_tzaware(self.updated_at, timezone.utc, localize=False)
+        return localized_dt_string(updated_str_utc, get_local_utcoffset())
 
     def __repr__(self):
         return f"<Comment {self.id}>"
-
-    # def __init__(self, content, type, book_id, user_id, parent_id=None):
-    #     self.content = content
-    #     self.type = type
-    #     self.book_id = book_id
-    #     self.user_id = user_id
-    #     self.parent_id = parent_id

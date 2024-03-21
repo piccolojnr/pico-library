@@ -41,7 +41,7 @@ class Resource(db.Model):
 
     __tablename__ = "resources"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    url = db.Column(db.String, unique=True)
+    url = db.Column(db.String, unique=True, nullable=False)
     size = db.Column(db.Integer)
     modified = db.Column(db.DateTime)
     type_name = db.Column(
@@ -61,9 +61,3 @@ class Resource(db.Model):
 
     def __repr__(self):
         return f"<Resource {self.url}>"
-
-    def __init__(self, url, size, modified, type_name):
-        self.url = url
-        self.size = size
-        self.modified = modified
-        self.type_name = type_name

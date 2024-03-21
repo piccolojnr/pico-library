@@ -1,6 +1,8 @@
 """Global pytest fixtures."""
 
+import pandas as pd
 import pytest
+import tqdm
 
 from app.v1 import create_app, db as database
 from app.v1.models import (
@@ -26,14 +28,16 @@ from app.v1.models import (
 )
 import factory
 
+from seed.seed import add_book, read_partial_csv_gz
 
-@pytest.fixture(scope="session")
+
+@pytest.fixture
 def app():
     app = create_app("testing")
     return app
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def db_session(app):
     with app.app_context():
         database.create_all()
@@ -45,6 +49,32 @@ def db_session(app):
 @pytest.fixture
 def client(app):
     return app.test_client()
+
+
+@pytest.fixture
+def seed_books():
+    print(f"Seeding...")
+
+    print("preparing data...")
+    books_df = read_partial_csv_gz("books_df.csv.gz", 50)
+
+    books_df["resources"] = books_df["resources"].apply(lambda x: eval(x))
+    books_df["agents"] = books_df["agents"].apply(lambda x: eval(x))
+    books_df["languages"] = books_df["languages"].apply(lambda x: eval(x))
+    books_df["subjects"] = books_df["subjects"].apply(lambda x: eval(x))
+    books_df["publishers"] = books_df["publishers"].apply(lambda x: eval(x))
+    books_df["bookshelves"] = books_df["bookshelves"].apply(lambda x: eval(x))
+    books_df["description"] = books_df["description"].apply(
+        lambda x: x if type(x) == str else ""
+    )
+
+    print("creating app...")
+    books = books_df.to_dict("records")
+
+    print(f"Seeding with {len(books)} books...")
+    for i in range(len(books)):
+        book = books[i]
+        add_book(book)
 
 
 @pytest.fixture
@@ -323,5 +353,3 @@ def rating_factory(db_session, user_factory, book_factory):
         rating = factory.Faker("random_int", min=1, max=5)
 
     return RatingFactory
-
-

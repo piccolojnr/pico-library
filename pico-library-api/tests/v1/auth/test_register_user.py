@@ -10,7 +10,7 @@ from pprint import pprint
 
 def test_register_user(db_session, app, client):
     with app.app_context():
-        response = register_user(client)
+        response = register_user(client, "user3@example.com")
         assert response.status_code == 201
         assert response.json["message"] == "User registered successfully"
         assert "auth" in response.json
