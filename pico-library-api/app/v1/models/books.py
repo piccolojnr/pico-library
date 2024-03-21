@@ -80,5 +80,9 @@ class Book(db.Model):
         )
         return localized_dt_string(updated_at_utc, use_tz=get_local_utcoffset())
 
+    @classmethod
+    def get_by_id(cls, id):
+        return cls.query.get(id)
+
     def __repr__(self):
         return f"<Book {self.title}>"

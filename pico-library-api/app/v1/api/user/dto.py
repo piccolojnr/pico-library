@@ -3,6 +3,7 @@ from flask_restx.fields import String, Integer, Boolean, DateTime, Float, Nested
 from flask_restx.reqparse import RequestParser
 from flask_restx.inputs import positive
 
+
 user_model = Model("User", {"email": String, "public_id": String})
 
 
@@ -19,6 +20,15 @@ profile_model = Model(
         "user": Nested(user_model),
     },
 )
+short_profile_model = Model(
+    "ShortProfile",
+    {
+        "first_name": String,
+        "last_name": String,
+        "user": Nested(user_model),
+    },
+)
+
 agent_model = Model(
     "Agent",
     {
@@ -69,5 +79,37 @@ book_pagination_model = Model(
         "items_per_page": Integer,
         "total_items": Integer,
         "items": List(Nested(book_model)),
+    },
+)
+
+comment_reqparse = RequestParser(bundle_errors=True)
+comment_reqparse.add_argument("content", type=str, required=True)
+
+comment_reqparse.add_argument("book_id", type=str, required=False)
+comment_reqparse.add_argument("parent_id", type=str, required=False)
+comment_reqparse.add_argument(
+    "type",
+    type=str,
+    choices=["comment", "reply", "review"],
+    required=True,
+    default="comment",
+)
+
+
+comment_model = Model(
+    "Comment",
+    {
+        "id": Integer,
+        "content": String,
+        "type": String(attribute="type_str"),
+        "user_profile": Nested(short_profile_model),
+        "book_id": Integer,
+        "parent_id": Integer,
+        "average_rating": Float,
+        "upvotes": Integer,
+        "downvotes": Integer,
+        "number_of_replies": Integer,
+        "created_at": String(attribute="created_at_str"),
+        "updated_at": String(attribute="updated_at_str"),
     },
 )

@@ -87,10 +87,32 @@ def get_user_profile(test_client, auth_token):
         return response
 
 
+def update_user_profile(test_client, auth_token, data):
+    with test_client.application.test_request_context():
+        response = test_client.put(
+            url_for("api.user_profile"),
+            headers={"Authorization": f"Bearer {auth_token}"},
+            json=data,
+            content_type="application/json",
+        )
+        return response
+
+
 def get_user_recommendations(test_client, auth_token, page=1, per_page=10):
     with test_client.application.test_request_context():
         response = test_client.get(
             url_for("api.user_recommendations", page=page, per_page=per_page),
             headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def create_comment(test_client, auth_token, **kwargs):
+    with test_client.application.test_request_context():
+        response = test_client.post(
+            url_for("api.user_comments"),
+            headers={"Authorization": f"Bearer {auth_token}"},
+            json=kwargs,
+            content_type="application/json",
         )
         return response

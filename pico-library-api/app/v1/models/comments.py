@@ -77,17 +77,25 @@ class Comment(db.Model):
     comment_votes = db.relationship("CommentVote", back_populates="comment")
     ratings = db.relationship("Rating", back_populates="review")
 
-    def rating(self):
-        if not self.ratings:
-            return 0
-        ratings = [rating.rating for rating in self.ratings]
-        return sum(ratings) / len(ratings)
+    @hybrid_property
+    def type_str(self):
+        return self.type.value
 
+    @hybrid_property
+    def number_of_replies(self):
+        return len(self.replies)
+
+    @hybrid_property
+    def user_profile(self):
+        return self.user.profile
+
+    @hybrid_property
     def upvotes(self):
         return len(
             [vote for vote in self.comment_votes if vote.vote == CommentVoteType.UPVOTE]
         )
 
+    @hybrid_property
     def downvotes(self):
         return len(
             [
@@ -113,6 +121,10 @@ class Comment(db.Model):
     def updated_at_str(self):
         updated_str_utc = make_tzaware(self.updated_at, timezone.utc, localize=False)
         return localized_dt_string(updated_str_utc, get_local_utcoffset())
+
+    @classmethod
+    def get_by_id(cls, comment_id):
+        return cls.query.get(comment_id)
 
     def __repr__(self):
         return f"<Comment {self.id}>"
