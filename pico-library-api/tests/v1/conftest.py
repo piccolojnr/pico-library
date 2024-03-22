@@ -53,9 +53,6 @@ def client(app):
 
 @pytest.fixture
 def seed_books():
-    print(f"Seeding...")
-
-    print("preparing data...")
     books_df = read_partial_csv_gz("books_df.csv.gz", 50)
 
     books_df["resources"] = books_df["resources"].apply(lambda x: eval(x))
@@ -68,10 +65,8 @@ def seed_books():
         lambda x: x if type(x) == str else ""
     )
 
-    print("creating app...")
     books = books_df.to_dict("records")
 
-    print(f"Seeding with {len(books)} books...")
     for i in range(len(books)):
         book = books[i]
         add_book(book)

@@ -124,7 +124,7 @@ class Comment(db.Model):
 
     @classmethod
     def get_by_id(cls, comment_id):
-        return cls.query.get(comment_id)
+        return cls.query.filter(cls.id == comment_id).first()
 
     def __repr__(self):
         return f"<Comment {self.id}>"

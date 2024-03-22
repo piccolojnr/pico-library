@@ -101,7 +101,7 @@ def update_user_profile(test_client, auth_token, data):
 def get_user_recommendations(test_client, auth_token, page=1, per_page=10):
     with test_client.application.test_request_context():
         response = test_client.get(
-            url_for("api.user_recommendations", page=page, per_page=per_page),
+            url_for("api.book_recommendations", page=page, per_page=per_page),
             headers={"Authorization": f"Bearer {auth_token}"},
         )
         return response
@@ -110,9 +110,31 @@ def get_user_recommendations(test_client, auth_token, page=1, per_page=10):
 def create_comment(test_client, auth_token, **kwargs):
     with test_client.application.test_request_context():
         response = test_client.post(
-            url_for("api.user_comments"),
+            url_for("api.comments"),
             headers={"Authorization": f"Bearer {auth_token}"},
             json=kwargs,
             content_type="application/json",
+        )
+        return response
+
+
+def retrive_comments(test_client, **kwargs):
+    with test_client.application.test_request_context():
+        response = test_client.get(
+            url_for("api.comments", **kwargs),
+        )
+        return response
+
+
+def search_books(test_client, query, criteria="title", page=1, per_page=10):
+    with test_client.application.test_request_context():
+        response = test_client.get(
+            url_for(
+                "api.book_search",
+                q=query,
+                criteria=criteria,
+                page=page,
+                per_page=per_page,
+            ),
         )
         return response

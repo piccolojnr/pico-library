@@ -82,7 +82,7 @@ class Book(db.Model):
 
     @classmethod
     def get_by_id(cls, id):
-        return cls.query.get(id)
+        return cls.query.filter(cls.id == id).first()
 
     def __repr__(self):
         return f"<Book {self.title}>"
