@@ -138,3 +138,92 @@ def search_books(test_client, query, criteria="title", page=1, per_page=10):
             ),
         )
         return response
+
+
+def get_book(test_client, book_id):
+    with test_client.application.test_request_context():
+        response = test_client.get(
+            url_for("api.book", book_id=book_id),
+        )
+        return response
+
+
+def create_agent(test_client, auth_token, **kwargs):
+    with test_client.application.test_request_context():
+        response = test_client.post(
+            url_for("api.agents"),
+            headers={"Authorization": f"Bearer {auth_token}"},
+            json=kwargs,
+            content_type="application/json",
+        )
+        return response
+
+
+def retrieve_agents(test_client, **kwargs):
+    with test_client.application.test_request_context():
+        response = test_client.get(
+            url_for("api.agents", **kwargs),
+        )
+        return response
+
+
+def get_agent(test_client, agent_id):
+    with test_client.application.test_request_context():
+        response = test_client.get(
+            url_for("api.agent", agent_id=agent_id),
+        )
+        return response
+
+
+def delete_agent(test_client, auth_token, agent_id):
+    with test_client.application.test_request_context():
+        response = test_client.delete(
+            url_for("api.agent", agent_id=agent_id),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def update_agent(test_client, auth_token, agent_id, data):
+    with test_client.application.test_request_context():
+        response = test_client.put(
+            url_for("api.agent", agent_id=agent_id),
+            headers={"Authorization": f"Bearer {auth_token}"},
+            json=data,
+            content_type="application/json",
+        )
+        return response
+
+
+def get_agent_books(test_client, agent_id, page=1, per_page=10):
+    with test_client.application.test_request_context():
+        response = test_client.get(
+            url_for("api.agent_books", agent_id=agent_id, page=page, per_page=per_page)
+        )
+        return response
+
+
+def add_agent_book(test_client, auth_token, agent_id, book_id):
+    with test_client.application.test_request_context():
+        response = test_client.post(
+            url_for("api.agent_book", agent_id=agent_id, book_id=book_id),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def remove_agent_book(test_client, auth_token, agent_id, book_id):
+    with test_client.application.test_request_context():
+        response = test_client.delete(
+            url_for("api.agent_book", agent_id=agent_id, book_id=book_id),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+# def get_book_agents(test_client, book_id):
+#     with test_client.application.test_request_context():
+#         response = test_client.get(
+#             url_for("api.book_agents", book_id=book_id),
+#         )
+#         return response

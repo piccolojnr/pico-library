@@ -2,8 +2,7 @@
 
 import pandas as pd
 import pytest
-import tqdm
-
+from tests.v1.util import EMAIL, PASSWORD
 from app.v1 import create_app, db as database
 from app.v1.models import (
     Book,
@@ -34,6 +33,7 @@ from seed.seed import add_book, read_partial_csv_gz
 @pytest.fixture
 def app():
     app = create_app("testing")
+    app.app_context().push()
     return app
 
 
@@ -86,7 +86,7 @@ def user_factory(db_session):
 
 @pytest.fixture
 def user(db_session, user_factory):
-    user = user_factory.create()
+    user = user_factory.create(email=EMAIL, password=PASSWORD)
     db_session.add(user)
     db_session.commit()
     return user
@@ -109,22 +109,7 @@ def book_factory(db_session):
 
 
 @pytest.fixture
-def agent_type_factory(db_session):
-    class AgentTypeFactory(factory.Factory):
-        class Meta:
-            model = AgentType
-
-        name = factory.Faker("word")
-
-    return AgentTypeFactory
-
-
-@pytest.fixture
-def agent_factory(db_session, agent_type_factory):
-    agent_type = agent_type_factory.create()
-    db_session.add(agent_type)
-    db_session.commit()
-
+def agent_factory(db_session):
     class AgentFactory(factory.Factory):
         class Meta:
             model = Agent
@@ -134,7 +119,7 @@ def agent_factory(db_session, agent_type_factory):
         birth_date = factory.Faker("date_of_birth")
         death_date = factory.Faker("date_of_birth")
         webpage = factory.Faker("url")
-        type_name = agent_type.name
+        type = factory.Faker("random_element", elements=AgentType)
 
     return AgentFactory
 

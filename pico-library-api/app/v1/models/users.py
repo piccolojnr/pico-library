@@ -3,7 +3,7 @@ from flask import current_app
 from sqlalchemy.ext.hybrid import hybrid_property
 from uuid import uuid4
 from datetime import timezone
-from app.v1.util.datetime_util import (
+from app.v1.utils.datetime_util import (
     get_local_utcoffset,
     localized_dt_string,
     make_tzaware,

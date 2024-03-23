@@ -1,3 +1,4 @@
+import datetime
 import pandas as pd
 from app.v1.models import (
     Publisher,
@@ -33,7 +34,11 @@ def add_resources(resources):
             new_type = add_resource_type(resource_type)
         url = resource["url"]
         size = resource["size"]
-        modified = resource["modified"]
+        modified = (
+            datetime.datetime.fromisoformat(resource["modified"])
+            if resource["modified"]
+            else None
+        )
         new_resource = Resource.query.filter(Resource.url == url).first()
         if not new_resource:
             new_resource = Resource(
@@ -48,10 +53,10 @@ def add_agents(agents):
     new_agents = []
     for k in agents:
         if k:
-            new_type = AgentType.query.filter(AgentType.name == k).first()
-            if not new_type:
-                new_type = AgentType(name=k)
-                db.session.add(new_type)
+            type_ = k.upper() if k and type(k) == str else None
+            new_type = AgentType.OTHER
+            if type_:
+                new_type = AgentType.__members__.get(type_)
             for agent in agents[k]:
                 name = agent["name"]
                 alias = agent["alias"]
@@ -66,7 +71,7 @@ def add_agents(agents):
                         birth_date=birth_date,
                         death_date=death_date,
                         webpage=webpage,
-                        type_name=new_type.name,
+                        type=new_type,
                     )
                     db.session.add(new_agent)
                 new_agents.append(new_agent)

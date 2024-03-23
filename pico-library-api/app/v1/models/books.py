@@ -8,7 +8,7 @@ from .publishers import book_publishers_association
 from .subjects import book_subjects_association
 from .resources import book_resource_association
 from datetime import timezone
-from app.v1.util.datetime_util import (
+from app.v1.utils.datetime_util import (
     make_tzaware,
     utc_now,
     localized_dt_string,

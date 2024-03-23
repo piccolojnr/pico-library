@@ -2,7 +2,7 @@ from app.v1 import db
 
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from app.v1.util.datetime_util import (
+from app.v1.utils.datetime_util import (
     utc_now,
     get_local_utcoffset,
     make_tzaware,

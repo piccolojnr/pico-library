@@ -1,7 +1,7 @@
 from app.v1 import db
 
 from datetime import timezone
-from app.v1.util.datetime_util import (
+from app.v1.utils.datetime_util import (
     localized_dt_string,
     get_local_utcoffset,
     utc_now,

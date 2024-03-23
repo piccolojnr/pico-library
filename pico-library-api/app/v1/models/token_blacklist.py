@@ -3,7 +3,7 @@
 from datetime import timezone
 
 from app.v1 import db
-from app.v1.util.datetime_util import utc_now, dtaware_fromtimestamp
+from app.v1.utils.datetime_util import utc_now, dtaware_fromtimestamp
 
 
 class BlacklistedToken(db.Model):
