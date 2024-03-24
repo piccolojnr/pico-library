@@ -106,7 +106,7 @@ def process_retrieve_user_comments(
         page=comments_pagination.page,
         items_per_page=comments_pagination.per_page,
         total_pages=comments_pagination.pages,
-        total_items=len(comments_pagination.items),
+        total_items=comments_pagination.total,
         items=comments_pagination.items,
         has_next=comments_pagination.has_next,
         has_prev=comments_pagination.has_prev,

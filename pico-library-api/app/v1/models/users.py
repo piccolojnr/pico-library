@@ -31,6 +31,8 @@ class User(db.Model):
     comments = db.relationship("Comment", back_populates="user")
     comment_votes = db.relationship("CommentVote", back_populates="user")
     ratings = db.relationship("Rating", back_populates="user")
+    bookshelves = db.relationship("Bookshelf", back_populates="user")
+
     user_subjects = db.relationship(
         "UserSubject",
         back_populates="user",

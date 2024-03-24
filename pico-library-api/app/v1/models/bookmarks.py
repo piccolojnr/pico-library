@@ -41,6 +41,7 @@ class Bookmark(db.Model):
     )
     last_read = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=utc_now)
+    updated_at = db.Column(db.DateTime, default=utc_now, onupdate=utc_now)
 
     user = db.relationship("User", back_populates="bookmarks")
     book = db.relationship("Book", back_populates="bookmarks")
@@ -58,6 +59,13 @@ class Bookmark(db.Model):
             self.created_at, use_tz=timezone.utc, localize=False
         )
         return localized_dt_string(created_at_utc, use_tz=get_local_utcoffset())
+
+    @hybrid_property
+    def updated_at_str(self):
+        updated_at_utc = make_tzaware(
+            self.updated_at, use_tz=timezone.utc, localize=False
+        )
+        return localized_dt_string(updated_at_utc, use_tz=get_local_utcoffset())
 
     def __repr__(self):
         return f"<Bookmark {self.book_id} {self.status}>"

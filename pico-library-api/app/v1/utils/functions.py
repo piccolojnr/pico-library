@@ -29,9 +29,7 @@ def add_resources(resources):
         url = resource["url"]
         size = resource["size"]
         modified = (
-            datetime.datetime.fromisoformat(
-                resource["modified"], "%Y-%m-%dT%H:%M:%S.%f"
-            )
+            datetime.datetime.fromisoformat(resource["modified"])
             if resource["modified"]
             else None
         )

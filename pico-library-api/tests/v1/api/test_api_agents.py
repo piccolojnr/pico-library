@@ -1,7 +1,7 @@
 from tests.v1.util import (
     create_agent,
     login_user,
-    retrieve_agents,
+    get_agents,
     delete_agent,
     update_agent,
     get_agent_books,
@@ -72,7 +72,7 @@ def test_retrive_agents(db_session, app, client, user):
         )
         assert response.status_code == 201
 
-    response = retrieve_agents(client, page=1, per_page=5)
+    response = get_agents(client, page=1, per_page=5)
     assert response.status_code == 200
     assert response.json["page"] == 1
     assert response.json["items_per_page"] == 5
@@ -126,7 +126,7 @@ def test_retrieve_agents_by_type(db_session, client, user, type):
         )
         assert response.status_code == 201
 
-    response = retrieve_agents(client, type=type)
+    response = get_agents(client, type=type)
 
     assert response.status_code == 200
 
@@ -227,17 +227,4 @@ def test_agent_books(db_session, book_factory, client, user):
         )
 
     response = get_agent_books(client, agent_id=agent_data["id"])
-    pprint(response.json)
-    # agents = []
-    # for i in range(5):
-    #     re
-    #     response = add_agent_book(
-    #         client, auth_token, agent_id=agent_data["id"], book_id=book.id
-    #     )
-    #     assert response.status_code == 200
-    #     agents.append(response.json["item"])
-
-    # response = add_agent_book(
-    #     client, auth_token, agent_id=agent_data["id"], book_id=book.id
-    # )
-    # assert response.status_code == 200
+    assert response.status_code == 200

@@ -6,7 +6,6 @@ from .agents import book_agents_association
 from .languages import book_languages_association
 from .publishers import book_publishers_association
 from .subjects import book_subjects_association
-from .resources import book_resource_association
 from datetime import timezone
 from app.v1.utils.datetime_util import (
     make_tzaware,
@@ -46,9 +45,7 @@ class Book(db.Model):
     subjects = db.relationship(
         "Subject", secondary=book_subjects_association, back_populates="books"
     )
-    resources = db.relationship(
-        "Resource", secondary=book_resource_association, back_populates="books"
-    )
+    resources = db.relationship("Resource", back_populates="book")
     ratings = db.relationship("Rating", back_populates="book")
     comments = db.relationship("Comment", back_populates="book")
     bookmarks = db.relationship("Bookmark", back_populates="book")

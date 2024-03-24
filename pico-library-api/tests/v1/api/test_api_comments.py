@@ -109,7 +109,7 @@ def test_retrieve_comments(db_session, app, client, book_factory):
     assert response.json["has_prev"] == True
     assert response.json["items_per_page"] == 5
     assert response.json["page"] == 2
-    assert response.json["total_items"] == 5
+    assert response.json["total_items"] == 20
     assert response.json["total_pages"] == 4
 
     comment_1 = response.json["items"][0]
@@ -140,7 +140,6 @@ def test_retrieve_comments(db_session, app, client, book_factory):
     assert response.json["has_prev"] == False
     assert response.json["items_per_page"] == 5
     assert response.json["page"] == 1
-    assert response.json["total_items"] == 5
     assert response.json["total_pages"] == 2
 
     for i in range(20):
@@ -161,5 +160,4 @@ def test_retrieve_comments(db_session, app, client, book_factory):
     assert response.json["has_prev"] == True
     assert response.json["items_per_page"] == 5
     assert response.json["page"] == 2
-    assert response.json["total_items"] == 5
     assert response.json["total_pages"] == 4

@@ -1,37 +1,70 @@
 from flask_restx import Namespace, Resource
 from flask_pyjwt import require_token
 from http import HTTPStatus
+from .dto import (
+    create_subject_parser,
+    pagination_links_model,
+    pagination_reqparse,
+    subject_model,
+    subject_pagination_model,
+    user_subject_model,
+)
+from .business import (
+    process_create_subject,
+    process_create_subject_book,
+    process_create_subject_user,
+    process_delete_subject,
+    process_delete_subject_book,
+    process_delete_subject_user,
+    process_get_subject,
+    process_get_subject_books,
+    process_get_subject_user,
+    process_get_subjects,
+    process_update_subject,
+)
 
 subjects_ns = Namespace(name="subjects", validate=True)
+subjects_ns.models[subject_model.name] = subject_model
+subjects_ns.models[subject_pagination_model.name] = subject_pagination_model
+subjects_ns.models[pagination_links_model.name] = pagination_links_model
+subjects_ns.models[user_subject_model.name] = user_subject_model
 
 
-@subjects_ns.route("/subjects", endpoint="subjects")
+@subjects_ns.route("/", endpoint="subjects")
 class SubjectsResource(Resource):
+    @subjects_ns.expect(pagination_reqparse)
     def get(self):
         """
         Get subjects.
         """
-        return {"subjects": ["subject1", "subject2"]}
+        args = pagination_reqparse.parse_args()
+        page = args["page"]
+        per_page = args["per_page"]
+        return process_get_subjects(page, per_page)
 
     @require_token()
     @subjects_ns.doc(security="Bearer")
     @subjects_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
     @subjects_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
     @subjects_ns.response(int(HTTPStatus.UNAUTHORIZED), "Token is invalid or expired.")
+    @subjects_ns.expect(create_subject_parser)
     def post(self):
         """
         Create subject.
         """
-        return {"subject": "subject1"}
+        args = create_subject_parser.parse_args()
+        name = args["name"]
+        return process_create_subject(name)
 
 
-@subjects_ns.route("/subjects/<subject_id>", endpoint="subject")
+@subjects_ns.route("/<subject_id>", endpoint="subject")
 class SubjectResource(Resource):
+    @subjects_ns.marshal_with(subject_model)
     def get(self, subject_id):
         """
         Get subject.
         """
-        return {"subject": subject_id}
+        return process_get_subject(subject_id)
 
     @require_token()
     @subjects_ns.doc(security="Bearer")
@@ -42,30 +75,37 @@ class SubjectResource(Resource):
         """
         Delete subject.
         """
-        return {"subject": subject_id}
+        return process_delete_subject(subject_id)
 
     @require_token()
     @subjects_ns.doc(security="Bearer")
     @subjects_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
     @subjects_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
     @subjects_ns.response(int(HTTPStatus.UNAUTHORIZED), "Token is invalid or expired.")
+    @subjects_ns.expect(create_subject_parser)
     def put(self, subject_id):
         """
         Update subject.
         """
-        return {"subject": subject_id}
+        args = create_subject_parser.parse_args()
+        name = args["name"]
+        return process_update_subject(subject_id, name)
 
 
-@subjects_ns.route("/subjects/<subject_id>/books", endpoint="subject_books")
+@subjects_ns.route("/<subject_id>/books", endpoint="subject_books")
 class SubjectBooksResource(Resource):
+    @subjects_ns.expect(pagination_reqparse)
     def get(self, subject_id):
         """
         Get subject's books.
         """
-        return {"books": ["book1", "book2"]}
+        args = pagination_reqparse.parse_args()
+        page = args["page"]
+        per_page = args["per_page"]
+        return process_get_subject_books(subject_id, page, per_page)
 
 
-@subjects_ns.route("/subjects/<subject_id>/books/<book_id>", endpoint="subject_book")
+@subjects_ns.route("/<subject_id>/books/<book_id>", endpoint="subject_book")
 class SubjectBookResource(Resource):
     @require_token()
     @subjects_ns.doc(security="Bearer")
@@ -76,7 +116,7 @@ class SubjectBookResource(Resource):
         """
         Delete subject's book.
         """
-        return {"book": book_id}
+        return process_delete_subject_book(subject_id, book_id)
 
     @require_token()
     @subjects_ns.doc(security="Bearer")
@@ -87,4 +127,41 @@ class SubjectBookResource(Resource):
         """
         Create subject's book.
         """
-        return {"book": "book1"}
+        return process_create_subject_book(subject_id, book_id)
+
+
+@subjects_ns.route("/<subject_id>/users/<user_public_id>", endpoint="subject_user")
+class SubjectUsersResource(Resource):
+    @require_token()
+    @subjects_ns.doc(security="Bearer")
+    @subjects_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
+    @subjects_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
+    @subjects_ns.response(int(HTTPStatus.UNAUTHORIZED), "Token is invalid or expired.")
+    @subjects_ns.marshal_with(user_subject_model)
+    def get(self, subject_id, user_public_id):
+        """
+        Get subject's user.
+        """
+        return process_get_subject_user(subject_id, user_public_id)
+
+    @require_token()
+    @subjects_ns.doc(security="Bearer")
+    @subjects_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
+    @subjects_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
+    @subjects_ns.response(int(HTTPStatus.UNAUTHORIZED), "Token is invalid or expired.")
+    def delete(self, subject_id, user_public_id):
+        """
+        Delete subject's user.
+        """
+        return process_delete_subject_user(subject_id, user_public_id)
+
+    @require_token()
+    @subjects_ns.doc(security="Bearer")
+    @subjects_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
+    @subjects_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
+    @subjects_ns.response(int(HTTPStatus.UNAUTHORIZED), "Token is invalid or expired.")
+    def post(self, subject_id, user_public_id):
+        """
+        Create subject's user.
+        """
+        return process_create_subject_user(subject_id, user_public_id)

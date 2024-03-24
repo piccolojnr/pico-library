@@ -2,58 +2,45 @@ from flask_restx import Model
 from flask_restx.fields import String, Integer, Boolean, Nested, List
 from flask_restx.reqparse import RequestParser
 from flask_restx.inputs import positive
-from app.v1.api.agents.dto import agent_model
+from app.v1.api.books.dto import book_model_short
 
-book_model_short = Model(
-    "BookShort",
+resource_model = Model(
+    "Resource",
     {
         "id": Integer,
-        "title": String,
-        "format": String,
-        "description": String,
-        "license": String,
-        "downloads": Integer,
-        "agents": List(Nested(agent_model)),
-        "created_at": String(attribute="created_at_str"),
-        "updated_at": String(attribute="updated_at_str"),
+        "url": String,
+        "size": Integer,
+        "modified": String,
+        "type": String(attribute="type_str"),
+        "book": Nested(book_model_short),
     },
 )
-book_model = Model(
-    "BookShort",
+short_resource_model = Model(
+    "ShortResource",
     {
         "id": Integer,
-        "title": String,
-        "format": String,
-        "description": String,
-        "license": String,
-        "downloads": Integer,
-        "agents": List(Nested(agent_model)),
-        "created_at": String(attribute="created_at_str"),
-        "updated_at": String(attribute="updated_at_str"),
+        "url": String,
+        "size": Integer,
+        "modified": String,
+        "type": String(attribute="type_str"),
+        "book_id": Integer,
     },
 )
 
-
-books_search_reqparse = RequestParser(bundle_errors=True)
-books_search_reqparse.add_argument("q", type=str, required=False, help="Search query")
-books_search_reqparse.add_argument(
-    "criteria",
-    type=str,
-    choices=["title", "author", "subject", "shelf"],
-    default="title",
-    required=False,
-)
-books_search_reqparse.add_argument("page", type=positive, default=1, required=False)
-books_search_reqparse.add_argument(
-    "per_page", type=positive, choices=[5, 10, 25, 50, 100], default=10, required=False
+create_resource_model = Model(
+    "CreateResource",
+    {
+        "url": String,
+        "size": Integer,
+        "modified": String,
+        "type": String,
+    },
 )
 
 
-recommendation_pagination_reqparse = RequestParser(bundle_errors=True)
-recommendation_pagination_reqparse.add_argument(
-    "page", type=positive, default=1, required=False
-)
-recommendation_pagination_reqparse.add_argument(
+pagination_reqparse = RequestParser(bundle_errors=True)
+pagination_reqparse.add_argument("page", type=positive, default=1, required=False)
+pagination_reqparse.add_argument(
     "per_page", type=positive, choices=[5, 10, 25, 50, 100], default=10, required=False
 )
 
@@ -61,8 +48,8 @@ pagination_links_model = Model(
     "Nav Links",
     {"self": String, "prev": String, "next": String, "first": String, "last": String},
 )
-book_pagination_model = Model(
-    "BookPagination",
+resources_pagination_model = Model(
+    "ResourcePagination",
     {
         "links": Nested(pagination_links_model, skip_none=True),
         "has_prev": Boolean,
@@ -71,24 +58,6 @@ book_pagination_model = Model(
         "total_pages": Integer,
         "items_per_page": Integer,
         "total_items": Integer,
-        "items": List(Nested(book_model_short)),
-    },
-)
-
-
-create_book_model = Model(
-    "CreateBook",
-    {
-        "title": String,
-        "format": String,
-        "description": String,
-        "license": String,
-        "downloads": Integer,
-        "agents": List(Nested(agent_model)),
-        "subjects": List(String),
-        "bookshelves": List(String),
-        "languages": List(String),
-        "resources": List(String),
-        "publishers": List(String),
+        "items": List(Nested(short_resource_model)),
     },
 )

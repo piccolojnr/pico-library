@@ -72,7 +72,7 @@ def process_get_agents(page=1, per_page=10, type="null"):
         page=agents.page,
         items_per_page=agents.per_page,
         total_pages=agents.pages,
-        total_items=len(agents.items),
+        total_items=agents.total,
         items=agents.items,
         has_next=agents.has_next,
         has_prev=agents.has_prev,
@@ -94,14 +94,14 @@ def process_get_agent_books(agent_id, page=1, per_page=10):
         abort(HTTPStatus.NOT_FOUND, "Agent not found")
 
     books = Book.query.filter(Book.agents.any(Agent.id == agent_id)).paginate(
-        page=1, per_page=10
+        page=page, per_page=per_page
     )
 
     pagination = dict(
         page=books.page,
         items_per_page=books.per_page,
         total_pages=books.pages,
-        total_items=len(books.items),
+        total_items=books.total,
         items=books.items,
         has_next=books.has_next,
         has_prev=books.has_prev,
@@ -110,9 +110,13 @@ def process_get_agent_books(agent_id, page=1, per_page=10):
         links=[],
     )
     response_data = marshal(pagination, book_pagination_model)
-    response_data["links"] = _pagination_nav_links(pagination, "agent_books")
+    response_data["links"] = _pagination_nav_links(
+        pagination, "agent_books", agent_id=agent_id
+    )
     response = jsonify(response_data)
-    response.headers["Link"] = _pagination_nav_header_links(pagination, "agent_books")
+    response.headers["Link"] = _pagination_nav_header_links(
+        pagination, "agent_books", agent_id=agent_id
+    )
     response.headers["Total-Count"] = books.pages
     return response
 

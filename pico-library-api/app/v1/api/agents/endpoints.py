@@ -92,7 +92,7 @@ class AgentBooksResource(Resource):
         args = agent_pagination_reqparse.parse_args()
         page = args["page"]
         per_page = args["per_page"]
-        return process_get_agent_books(agent_id, page=page, per_page=per_page)
+        return process_get_agent_books(agent_id, page, per_page)
 
 
 @agents_ns.route("/<int:agent_id>/books/<int:book_id>", endpoint="agent_book")
