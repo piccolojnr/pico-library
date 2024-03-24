@@ -1,4 +1,4 @@
-from app.v1.models import Subject, User, UserSubject, Book
+from app.v1.models import Subject, User, Book
 from app.v1 import db
 from flask import jsonify, url_for
 from flask_restx import marshal, abort
@@ -69,10 +69,15 @@ def process_delete_subject(subject_id):
         abort(HTTPStatus.NOT_FOUND, "Subject not found")
 
 
-def process_update_subject(subject_id, name):
+def process_update_subject(subject_id, name, score):
     subject = Subject.query.filter_by(id=subject_id).first()
     if subject:
-        subject.name = name
+        if name:
+            subject.name = name
+
+        if score:
+            subject.score = score
+
         db.session.commit()
         return {"status": "success", "message": "Subject updated successfully"}
     else:
@@ -145,25 +150,6 @@ def process_get_subject_books(subject_id, page=1, per_page=10):
     return response
 
 
-def process_get_subject_user(subject_id, user_public_id):
-    subject = Subject.query.filter(Subject.id == subject_id).first()
-    if not subject:
-        abort(HTTPStatus.NOT_FOUND, "Subject not found")
-
-    user = User.query.filter(User.public_id == user_public_id).first()
-    if not user:
-        abort(HTTPStatus.NOT_FOUND, "User not found")
-
-    user_subject = UserSubject.query.filter(
-        UserSubject.subject_id == subject.id, UserSubject.user_id == user.id
-    ).first()
-
-    if user_subject:
-        return user_subject
-    else:
-        abort(HTTPStatus.NOT_FOUND, "Book not found in subject")
-
-
 def process_create_subject_user(subject_id, user_public_id):
     subject = Subject.query.filter(Subject.id == subject_id).first()
     if not subject:
@@ -173,8 +159,8 @@ def process_create_subject_user(subject_id, user_public_id):
     if not user:
         abort(HTTPStatus.NOT_FOUND, "User not found")
 
-    user_subject = UserSubject(subject_id=subject.id, user_id=user.id)
-    db.session.add(user_subject)
+    subject.users.append(user)
+
     db.session.commit()
 
     return {"status": "success", "message": "User added to subject successfully"}
@@ -189,16 +175,10 @@ def process_delete_subject_user(subject_id, user_public_id):
     if not user:
         abort(HTTPStatus.NOT_FOUND, "User not found")
 
-    user_subject = UserSubject.query.filter(
-        UserSubject.subject_id == subject.id, UserSubject.user_id == user.id
-    ).first()
+    subject.users.remove(user)
 
-    if user_subject:
-        db.session.delete(user_subject)
-        db.session.commit()
-        return {
-            "status": "success",
-            "message": "User removed from subject successfully",
-        }
-    else:
-        abort(HTTPStatus.NOT_FOUND, "User not found in subject")
+    db.session.commit()
+    return {
+        "status": "success",
+        "message": "User removed from subject successfully",
+    }

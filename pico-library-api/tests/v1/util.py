@@ -1,6 +1,6 @@
 from flask import url_for
 
-
+ADMIN_EMAIL = "admin@example.com"
 EMAIL = "new_user@example.com"
 PASSWORD = "XXXXXXXX"
 FIRST_NAME = "firstname"
@@ -12,6 +12,14 @@ def get_protected_route(test_client, auth_token):
     with test_client.application.test_request_context():
         return test_client.get(
             url_for("api.protected_route"),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+
+
+def get_admin_protected_route(test_client, auth_token):
+    with test_client.application.test_request_context():
+        return test_client.get(
+            url_for("api.admin_protected_route"),
             headers={"Authorization": f"Bearer {auth_token}"},
         )
 
@@ -380,10 +388,10 @@ def delete_subject(test_client, auth_token, subject_id):
         return response
 
 
-def update_subject(test_client, auth_token, subject_id, name):
+def update_subject(test_client, auth_token, subject_id, **kwargs):
     with test_client.application.test_request_context():
         response = test_client.put(
-            url_for("api.subject", subject_id=subject_id, name=name),
+            url_for("api.subject", subject_id=subject_id, **kwargs),
             headers={"Authorization": f"Bearer {auth_token}"},
         )
         return response
@@ -431,17 +439,6 @@ def create_subject_user(test_client, auth_token, subject_id, user_public_id):
 def delete_subject_user(test_client, auth_token, subject_id, user_public_id):
     with test_client.application.test_request_context():
         response = test_client.delete(
-            url_for(
-                "api.subject_user", subject_id=subject_id, user_public_id=user_public_id
-            ),
-            headers={"Authorization": f"Bearer {auth_token}"},
-        )
-        return response
-
-
-def get_subject_user(test_client, auth_token, subject_id, user_public_id):
-    with test_client.application.test_request_context():
-        response = test_client.get(
             url_for(
                 "api.subject_user", subject_id=subject_id, user_public_id=user_public_id
             ),

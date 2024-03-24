@@ -9,6 +9,7 @@ from flask_pyjwt import current_token
 from app.v1.utils.pagination import _pagination_nav_header_links, _pagination_nav_links
 from app.v1.api.books.dto import book_pagination_model
 
+
 def process_create_bookshelf(data):
     public_id = current_token.sub
 

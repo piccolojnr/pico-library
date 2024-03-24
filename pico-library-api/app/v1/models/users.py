@@ -3,6 +3,8 @@ from flask import current_app
 from sqlalchemy.ext.hybrid import hybrid_property
 from uuid import uuid4
 from datetime import timezone
+from .subjects import user_subjects_association
+from .bookshelves import user_bookshelves_association
 from app.v1.utils.datetime_util import (
     get_local_utcoffset,
     localized_dt_string,
@@ -22,6 +24,7 @@ class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String)
+    is_admin = db.Column(db.Boolean, default=False)
     password_hash = db.Column(db.String)
     created_at = db.Column(db.DateTime, default=utc_now, nullable=False)
     last_logged_in = db.Column(db.DateTime, default=utc_now)
@@ -33,13 +36,13 @@ class User(db.Model):
     ratings = db.relationship("Rating", back_populates="user")
     bookshelves = db.relationship("Bookshelf", back_populates="user")
 
-    user_subjects = db.relationship(
-        "UserSubject",
-        back_populates="user",
+    subjects = db.relationship(
+        "Subject", secondary=user_subjects_association, back_populates="users"
     )
-    user_bookshelves = db.relationship(
-        "UserBookshelf",
-        back_populates="user",
+    bookshelves = db.relationship(
+        "Bookshelf",
+        secondary=user_bookshelves_association,
+        back_populates="users",
     )
 
     public_id = db.Column(db.String, default=lambda: str(uuid4()))
@@ -101,7 +104,7 @@ class User(db.Model):
         Generates the Auth Token
         :return: string
         """
-        return auth_manager.auth_token(self.public_id, self.email)
+        return auth_manager.auth_token(self.public_id, dict(is_admin=self.is_admin))
 
     def generate_refresh_token(self):
         """

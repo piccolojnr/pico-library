@@ -27,7 +27,7 @@ agents_ns.models[agent_pagination_model.name] = agent_pagination_model
 
 @agents_ns.route("/", endpoint="agents")
 class AgentsResource(Resource):
-    @require_token()
+    @require_token(scope={"is_admin": True})
     @agents_ns.doc(security="Bearer")
     @agents_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
     @agents_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
@@ -56,8 +56,7 @@ class AgentResource(Resource):
         """
         return process_get_agent(agent_id)
 
-    @require_token()
-    @require_token()
+    @require_token(scope={"is_admin": True})
     @agents_ns.doc(security="Bearer")
     @agents_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
     @agents_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
@@ -68,7 +67,7 @@ class AgentResource(Resource):
         """
         return process_delete_agent(agent_id)
 
-    @require_token()
+    @require_token(scope={"is_admin": True})
     @agents_ns.doc(security="Bearer")
     @agents_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
     @agents_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
@@ -97,7 +96,7 @@ class AgentBooksResource(Resource):
 
 @agents_ns.route("/<int:agent_id>/books/<int:book_id>", endpoint="agent_book")
 class AgentBookResource(Resource):
-    @require_token()
+    @require_token(scope={"is_admin": True})
     @agents_ns.doc(security="Bearer")
     @agents_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
     @agents_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
@@ -108,7 +107,7 @@ class AgentBookResource(Resource):
         """
         return process_remove_agent_book(agent_id, book_id)
 
-    @require_token()
+    @require_token(scope={"is_admin": True})
     @agents_ns.doc(security="Bearer")
     @agents_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
     @agents_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")

@@ -4,3 +4,4 @@ def test_create_subject(subject_factory, db_session):
     db_session.commit()
 
     assert subject.name is not None
+    assert subject.score == 0

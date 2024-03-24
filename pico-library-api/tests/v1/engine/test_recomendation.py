@@ -1,5 +1,5 @@
 from app.v1.services.recommendation_engine import generate_recommendations
-from app.v1.models import Book, Subject, UserSubject
+from app.v1.models import Book, Subject
 import random
 from tests.v1.util import get_user_recommendations, register_user
 from pprint import pprint
@@ -30,9 +30,7 @@ def test_recommedations_for_user(db_session, app, client, seed_books, user_facto
     u_subjects = [random.choice(subjects) for _ in range(5)]
 
     for subject in u_subjects:
-        user_subject = UserSubject(user_id=user.id, subject_id=subject.id)
-        user_subject.score = 2
-        db_session.add(user_subject)
+        subject.score = 2
 
     db_session.commit()
 

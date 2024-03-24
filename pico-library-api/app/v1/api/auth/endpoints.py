@@ -118,3 +118,10 @@ class ProtectedRoute(Resource):
     @require_token()
     def get(self):
         return {"message": "You've reached the protected route!"}, 200
+
+
+@auth_ns.route("/admin_protected_route", endpoint="admin_protected_route")
+class ProtectedRoute(Resource):
+    @require_token(scope={"is_admin": True})
+    def get(self):
+        return {"message": "You've reached the admin protected route!"}, 200

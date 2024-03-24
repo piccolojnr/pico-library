@@ -8,6 +8,7 @@ from .dto import (
     subject_model,
     subject_pagination_model,
     user_subject_model,
+    update_subject_parser,
 )
 from .business import (
     process_create_subject,
@@ -18,7 +19,6 @@ from .business import (
     process_delete_subject_user,
     process_get_subject,
     process_get_subject_books,
-    process_get_subject_user,
     process_get_subjects,
     process_update_subject,
 )
@@ -82,14 +82,15 @@ class SubjectResource(Resource):
     @subjects_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
     @subjects_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
     @subjects_ns.response(int(HTTPStatus.UNAUTHORIZED), "Token is invalid or expired.")
-    @subjects_ns.expect(create_subject_parser)
+    @subjects_ns.expect(update_subject_parser, validate=True)
     def put(self, subject_id):
         """
         Update subject.
         """
-        args = create_subject_parser.parse_args()
+        args = update_subject_parser.parse_args()
         name = args["name"]
-        return process_update_subject(subject_id, name)
+        score = args["score"]
+        return process_update_subject(subject_id, name, score)
 
 
 @subjects_ns.route("/<subject_id>/books", endpoint="subject_books")
@@ -132,18 +133,6 @@ class SubjectBookResource(Resource):
 
 @subjects_ns.route("/<subject_id>/users/<user_public_id>", endpoint="subject_user")
 class SubjectUsersResource(Resource):
-    @require_token()
-    @subjects_ns.doc(security="Bearer")
-    @subjects_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
-    @subjects_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
-    @subjects_ns.response(int(HTTPStatus.UNAUTHORIZED), "Token is invalid or expired.")
-    @subjects_ns.marshal_with(user_subject_model)
-    def get(self, subject_id, user_public_id):
-        """
-        Get subject's user.
-        """
-        return process_get_subject_user(subject_id, user_public_id)
-
     @require_token()
     @subjects_ns.doc(security="Bearer")
     @subjects_ns.response(int(HTTPStatus.OK), "Token is currently valid.")

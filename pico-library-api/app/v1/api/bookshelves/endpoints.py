@@ -44,7 +44,7 @@ class BookshelvesResource(Resource):
         per_page = args["per_page"]
         return process_get_bookshelves(page, per_page)
 
-    @require_token()
+    @require_token(scope={"is_admin": True})
     @bookshelves_ns.doc(security="Bearer")
     @bookshelves_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
     @bookshelves_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
@@ -68,7 +68,7 @@ class BookshelfResource(Resource):
         """
         return process_get_bookshelf(bookshelf_id)
 
-    @require_token()
+    @require_token(scope={"is_admin": True})
     @bookshelves_ns.doc(security="Bearer")
     @bookshelves_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
     @bookshelves_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
@@ -81,7 +81,7 @@ class BookshelfResource(Resource):
         """
         return process_delete_bookshelf(bookshelf_id)
 
-    @require_token()
+    @require_token(scope={"is_admin": True})
     @bookshelves_ns.doc(security="Bearer")
     @bookshelves_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
     @bookshelves_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
@@ -108,7 +108,7 @@ class BookshelfBooksResource(Resource):
 
 @bookshelves_ns.route("<bookshelf_id>/books/<book_id>", endpoint="bookshelf_book")
 class BookshelfBookResource(Resource):
-    @require_token()
+    @require_token(scope={"is_admin": True})
     @bookshelves_ns.doc(security="Bearer")
     @bookshelves_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
     @bookshelves_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
@@ -121,7 +121,7 @@ class BookshelfBookResource(Resource):
         """
         return process_delete_bookshelf_book_relationship(bookshelf_id, book_id)
 
-    @require_token()
+    @require_token(scope={"is_admin": True})
     @bookshelves_ns.doc(security="Bearer")
     @bookshelves_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
     @bookshelves_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")

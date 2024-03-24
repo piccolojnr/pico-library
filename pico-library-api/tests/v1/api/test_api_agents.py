@@ -7,6 +7,7 @@ from tests.v1.util import (
     get_agent_books,
     add_agent_book,
     remove_agent_book,
+    ADMIN_EMAIL,
 )
 from pprint import pprint
 import pytest
@@ -28,8 +29,8 @@ import pytest
         ("TRANSLATOR", "Agent 11"),
     ],
 )
-def test_create_agent(db_session, client, user, name, type):
-    response = login_user(client)
+def test_create_agent(db_session, client, admin_user, name, type):
+    response = login_user(client, ADMIN_EMAIL)
     assert response.status_code == 200
 
     auth_token = response.json["auth"]["auth_token"]
@@ -40,8 +41,8 @@ def test_create_agent(db_session, client, user, name, type):
     assert response.json["item"]["alias"] == "alias"
 
 
-def test_retrive_agents(db_session, app, client, user):
-    response = login_user(client)
+def test_retrive_agents(db_session, app, client, admin_user):
+    response = login_user(client, ADMIN_EMAIL)
     assert response.status_code == 200
 
     auth_token = response.json["auth"]["auth_token"]
@@ -94,8 +95,8 @@ def test_retrive_agents(db_session, app, client, user):
         "TRANSLATOR",
     ],
 )
-def test_retrieve_agents_by_type(db_session, client, user, type):
-    response = login_user(client)
+def test_retrieve_agents_by_type(db_session, client, admin_user, type):
+    response = login_user(client, ADMIN_EMAIL)
     assert response.status_code == 200
 
     auth_token = response.json["auth"]["auth_token"]
@@ -131,8 +132,8 @@ def test_retrieve_agents_by_type(db_session, client, user, type):
     assert response.status_code == 200
 
 
-def test_get_delete_update_agent(db_session, client, user):
-    response = login_user(client)
+def test_get_delete_update_agent(db_session, client, admin_user):
+    response = login_user(client, ADMIN_EMAIL)
     assert response.status_code == 200
 
     auth_token = response.json["auth"]["auth_token"]
@@ -161,8 +162,8 @@ def test_get_delete_update_agent(db_session, client, user):
     assert response.status_code == 200
 
 
-def test_add_agent_book(db_session, book_factory, client, user):
-    response = login_user(client)
+def test_add_agent_book(db_session, book_factory, client, admin_user):
+    response = login_user(client, ADMIN_EMAIL)
     assert response.status_code == 200
 
     auth_token = response.json["auth"]["auth_token"]
@@ -198,8 +199,8 @@ def test_add_agent_book(db_session, book_factory, client, user):
     assert len(book.agents) == 0
 
 
-def test_agent_books(db_session, book_factory, client, user):
-    response = login_user(client)
+def test_agent_books(db_session, book_factory, client, admin_user):
+    response = login_user(client, ADMIN_EMAIL)
     assert response.status_code == 200
 
     auth_token = response.json["auth"]["auth_token"]

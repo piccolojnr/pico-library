@@ -2,7 +2,7 @@
 
 import pandas as pd
 import pytest
-from tests.v1.util import EMAIL, PASSWORD
+from tests.v1.util import EMAIL, PASSWORD, ADMIN_EMAIL
 from app.v1 import create_app, db as database
 from app.v1.models import (
     Book,
@@ -85,8 +85,29 @@ def user_factory(db_session):
 
 
 @pytest.fixture
+def admin_user_factory(db_session):
+    class AdminUserFactory(factory.Factory):
+        class Meta:
+            model = User
+
+        email = factory.Faker("email")
+        password = factory.Faker("password")
+        is_admin = True
+
+    return AdminUserFactory
+
+
+@pytest.fixture
 def user(db_session, user_factory):
     user = user_factory.create(email=EMAIL, password=PASSWORD)
+    db_session.add(user)
+    db_session.commit()
+    return user
+
+
+@pytest.fixture
+def admin_user(db_session, admin_user_factory):
+    user = admin_user_factory.create(email=ADMIN_EMAIL, password=PASSWORD)
     db_session.add(user)
     db_session.commit()
     return user
@@ -125,12 +146,14 @@ def agent_factory(db_session):
 
 
 @pytest.fixture
-def bookshelf_factory(db_session):
+def bookshelf_factory(db_session, admin_user):
     class BookshelfFactory(factory.Factory):
         class Meta:
             model = Bookshelf
 
         name = factory.Faker("name")
+        description = factory.Faker("paragraph", nb_sentences=3)
+        user_id = admin_user.id
 
     return BookshelfFactory
 

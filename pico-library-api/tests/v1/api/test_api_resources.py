@@ -5,12 +5,13 @@ from tests.v1.util import (
     update_resource,
     get_resources,
     login_user,
+    ADMIN_EMAIL,
 )
 from pprint import pprint
 
 
-def test_create_resource(db_session, client, book_factory, user):
-    response = login_user(client)
+def test_create_resource(db_session, client, book_factory, admin_user):
+    response = login_user(client, ADMIN_EMAIL)
     assert response.status_code == 200
     auth_token = response.json["auth"]["auth_token"]
 
@@ -49,11 +50,10 @@ def test_create_resource(db_session, client, book_factory, user):
     assert response.status_code == 404
 
 
-def test_get_resources(db_session, client, book_factory, user):
-    response = login_user(client)
+def test_get_resources(db_session, client, book_factory, admin_user):
+    response = login_user(client, ADMIN_EMAIL)
     assert response.status_code == 200
     auth_token = response.json["auth"]["auth_token"]
-
     book = book_factory.create()
     db_session.add(book)
     db_session.commit()
@@ -65,6 +65,7 @@ def test_get_resources(db_session, client, book_factory, user):
             "size": 100,
         }
         response = create_resource(client, auth_token, book_id=book.id, data=data)
+
         assert response.status_code == 201
 
     response = get_resources(client, book_id=book.id)

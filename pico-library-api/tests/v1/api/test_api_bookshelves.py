@@ -8,11 +8,13 @@ from tests.v1.util import (
     add_bookshelf_book,
     get_bookshelf_books,
     remove_bookshelf_book,
+    ADMIN_EMAIL,
 )
+from pprint import pprint
 
 
-def test_create_bookshelf(db_session, client, user):
-    response = login_user(client)
+def test_create_bookshelf(db_session, client, admin_user):
+    response = login_user(client, ADMIN_EMAIL)
     assert response.status_code == 200
     auth_token = response.json["auth"]["auth_token"]
 
@@ -64,8 +66,8 @@ def test_create_bookshelf(db_session, client, user):
     assert response.status_code == 404
 
 
-def test_retrieve_bookshelves(db_session, client, user):
-    response = login_user(client)
+def test_retrieve_bookshelves(db_session, client, admin_user):
+    response = login_user(client, ADMIN_EMAIL)
     assert response.status_code == 200
 
     auth_token = response.json["auth"]["auth_token"]
@@ -81,8 +83,8 @@ def test_retrieve_bookshelves(db_session, client, user):
     assert response.json["total_pages"] == 4
 
 
-def test_bookshelf_books(db_session, client, book_factory, user):
-    response = login_user(client)
+def test_bookshelf_books(db_session, client, book_factory, admin_user):
+    response = login_user(client, ADMIN_EMAIL)
     assert response.status_code == 200
 
     auth_token = response.json["auth"]["auth_token"]
@@ -124,3 +126,30 @@ def test_bookshelf_books(db_session, client, book_factory, user):
     response = get_bookshelf_books(client, bookshelf_id=bookshelf.json["item"]["id"])
     assert response.status_code == 200
     assert len(response.json["items"]) == 0
+
+
+def test_update_bookshelf_score(db_session, client, book_factory, admin_user):
+    response = login_user(client, ADMIN_EMAIL)
+    assert response.status_code == 200
+
+    auth_token = response.json["auth"]["auth_token"]
+
+    response = create_bookshelf(client, auth_token, name="Test Bookshelf")
+    assert response.status_code == 201
+    assert response.json["item"]["score"] == 0
+
+    bookshelf = response.json["item"]
+    # remove null values
+    for key in list(bookshelf.keys()):
+        if bookshelf[key] is None:
+            del bookshelf[key]
+
+    bookshelf["score"] += 1
+    response = update_bookshelf(
+        client, auth_token, bookshelf_id=bookshelf["id"], data=bookshelf
+    )
+    assert response.status_code == 200
+
+    response = get_bookshelf(client, bookshelf_id=bookshelf["id"])
+    assert response.status_code == 200
+    assert response.json["score"] == 1

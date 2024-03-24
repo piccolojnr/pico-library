@@ -5,8 +5,6 @@ from app.v1.models import (
     Bookmark,
     Comment,
     CommentType,
-    UserSubject,
-    UserBookshelf,
 )
 from sqlalchemy import func
 
@@ -50,25 +48,17 @@ def calculate_score(user: User, book: Book):
     # Example scoring function
     score = 0
     for subject in book.subjects:
-        user_subject: UserSubject = UserSubject.query.filter(
-            UserSubject.subject_id == subject.id,
-            UserSubject.user_id == user.id,
-        ).first()
-        if user_subject:
+        if subject in user.subjects:
             score += 1
 
             score += (
-                user_subject.score
+                subject.score
             )  # Incorporate subject score into the score calculation
 
     for bookshelf in book.bookshelves:
-        user_bookshelf: UserBookshelf = UserBookshelf.query.filter(
-            UserBookshelf.bookshelf_id == bookshelf.id,
-            UserBookshelf.user_id == user.id,
-        ).first()
-        if user_bookshelf:
+        if bookshelf in user.bookshelves:
             score += 1
-            score += user_bookshelf.score
+            score += bookshelf.score
 
     # Incorporate other factors into the score calculation, such as average rating
     if book.average_rating:

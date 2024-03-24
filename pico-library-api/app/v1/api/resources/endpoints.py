@@ -40,7 +40,7 @@ class ResourcesResource(Resource):
         per_page = args["per_page"]
         return process_get_resources(book_id, page, per_page)
 
-    @require_token()
+    @require_token(scope={"is_admin": True})
     @resources_ns.expect(create_resource_model, validate=True)
     @resources_ns.doc(security="Bearer")
     @resources_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
@@ -51,6 +51,7 @@ class ResourcesResource(Resource):
         Create  books resource.
         """
         data = request.get_json()
+
         return process_create_resource(book_id, data)
 
 
@@ -63,7 +64,7 @@ class ResourceResource(Resource):
         """
         return process_get_resource(resource_id)
 
-    @require_token()
+    @require_token(scope={"is_admin": True})
     @resources_ns.doc(security="Bearer")
     @resources_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
     @resources_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")
@@ -74,7 +75,7 @@ class ResourceResource(Resource):
         """
         return process_delete_resource(resource_id)
 
-    @require_token()
+    @require_token(scope={"is_admin": True})
     @resources_ns.doc(security="Bearer")
     @resources_ns.response(int(HTTPStatus.OK), "Token is currently valid.")
     @resources_ns.response(int(HTTPStatus.BAD_REQUEST), "Validation error.")

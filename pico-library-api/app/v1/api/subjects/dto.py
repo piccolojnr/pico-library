@@ -10,6 +10,7 @@ subject_model = Model(
     {
         "id": Integer,
         "name": String,
+        "score": Integer,
     },
 )
 
@@ -27,6 +28,11 @@ create_subject_parser = RequestParser()
 create_subject_parser.add_argument(
     "name", type=str, required=True, help="Subject name is required"
 )
+create_subject_parser.add_argument("score", type=positive, required=False)
+
+update_subject_parser = RequestParser()
+update_subject_parser.add_argument("name", type=str, required=False)
+update_subject_parser.add_argument("score", type=positive, required=False)
 
 
 pagination_reqparse = RequestParser(bundle_errors=True)
