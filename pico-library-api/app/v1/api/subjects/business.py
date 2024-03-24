@@ -118,10 +118,10 @@ def process_delete_subject_book(subject_id, user_public_id):
 
 
 def process_get_subject_books(subject_id, page=1, per_page=10):
-    bookshelf = Subject.query.filter(Subject.id == subject_id).first()
-    if not bookshelf:
+    subject = Subject.query.filter(Subject.id == subject_id).first()
+    if not subject:
         abort(HTTPStatus.NOT_FOUND, "Subject not found")
-    books = Book.query.filter(Book.subjects.any(Subject.id == bookshelf.id)).paginate(
+    books = Book.query.filter(Book.subjects.any(Subject.id == subject.id)).paginate(
         page=page,
         per_page=per_page,
     )

@@ -445,3 +445,188 @@ def delete_subject_user(test_client, auth_token, subject_id, user_public_id):
             headers={"Authorization": f"Bearer {auth_token}"},
         )
         return response
+
+
+def create_language(test_client, auth_token, **kwargs):
+    with test_client.application.test_request_context():
+        response = test_client.post(
+            url_for("api.languages", **kwargs),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def get_languages(test_client, page=1, per_page=10):
+    with test_client.application.test_request_context():
+        response = test_client.get(
+            url_for("api.languages", page=page, per_page=per_page)
+        )
+        return response
+
+
+def get_language(test_client, language_id):
+    with test_client.application.test_request_context():
+        response = test_client.get(url_for("api.language", language_id=language_id))
+        return response
+
+
+def delete_language(test_client, auth_token, language_id):
+    with test_client.application.test_request_context():
+        response = test_client.delete(
+            url_for("api.language", language_id=language_id),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def update_language(test_client, auth_token, language_id, **kwargs):
+    with test_client.application.test_request_context():
+        response = test_client.put(
+            url_for("api.language", language_id=language_id, **kwargs),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def get_language_books(test_client, language_id, page=1, per_page=10):
+    with test_client.application.test_request_context():
+        response = test_client.get(
+            url_for(
+                "api.language_books",
+                language_id=language_id,
+                page=page,
+                per_page=per_page,
+            )
+        )
+        return response
+
+
+def create_language_book(test_client, auth_token, language_id, book_id):
+    with test_client.application.test_request_context():
+        response = test_client.post(
+            url_for("api.language_book", language_id=language_id, book_id=book_id),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def delete_language_book(test_client, auth_token, language_id, book_id):
+    with test_client.application.test_request_context():
+        response = test_client.delete(
+            url_for("api.language_book", language_id=language_id, book_id=book_id),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def create_publisher(test_client, auth_token, **kwargs):
+    with test_client.application.test_request_context():
+        response = test_client.post(
+            url_for("api.publishers", **kwargs),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def get_publishers(test_client, page=1, per_page=10):
+    with test_client.application.test_request_context():
+        response = test_client.get(
+            url_for("api.publishers", page=page, per_page=per_page)
+        )
+        return response
+
+
+def get_publisher(test_client, publisher_id):
+    with test_client.application.test_request_context():
+        response = test_client.get(url_for("api.publisher", publisher_id=publisher_id))
+        return response
+
+
+def delete_publisher(test_client, auth_token, publisher_id):
+    with test_client.application.test_request_context():
+        response = test_client.delete(
+            url_for("api.publisher", publisher_id=publisher_id),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def update_publisher(test_client, auth_token, publisher_id, **kwargs):
+    with test_client.application.test_request_context():
+        response = test_client.put(
+            url_for("api.publisher", publisher_id=publisher_id, **kwargs),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def get_publisher_books(test_client, publisher_id, page=1, per_page=10):
+    with test_client.application.test_request_context():
+        response = test_client.get(
+            url_for(
+                "api.publisher_books",
+                publisher_id=publisher_id,
+                page=page,
+                per_page=per_page,
+            )
+        )
+        return response
+
+
+def create_publisher_book(test_client, auth_token, publisher_id, book_id):
+    with test_client.application.test_request_context():
+        response = test_client.post(
+            url_for("api.publisher_book", publisher_id=publisher_id, book_id=book_id),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def delete_publisher_book(test_client, auth_token, publisher_id, book_id):
+    with test_client.application.test_request_context():
+        response = test_client.delete(
+            url_for("api.publisher_book", publisher_id=publisher_id, book_id=book_id),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def create_bookmark(test_client, auth_token, **kwargs):
+    with test_client.application.test_request_context():
+        response = test_client.post(
+            url_for("api.bookmarks", **kwargs),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def get_bookmarks(test_client, page=1, per_page=10):
+    with test_client.application.test_request_context():
+        response = test_client.get(
+            url_for("api.bookmarks", page=page, per_page=per_page)
+        )
+        return response
+
+
+def get_bookmark(test_client, bookmark_id):
+    with test_client.application.test_request_context():
+        response = test_client.get(url_for("api.bookmark", bookmark_id=bookmark_id))
+        return response
+
+
+def delete_bookmark(test_client, auth_token, bookmark_id):
+    with test_client.application.test_request_context():
+        response = test_client.delete(
+            url_for("api.bookmark", bookmark_id=bookmark_id),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def update_bookmark(test_client, auth_token, bookmark_id, **kwargs):
+    with test_client.application.test_request_context():
+        response = test_client.put(
+            url_for("api.bookmark", bookmark_id=bookmark_id, **kwargs),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response

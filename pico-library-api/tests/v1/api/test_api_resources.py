@@ -65,7 +65,6 @@ def test_get_resources(db_session, client, book_factory, admin_user):
             "size": 100,
         }
         response = create_resource(client, auth_token, book_id=book.id, data=data)
-
         assert response.status_code == 201
 
     response = get_resources(client, book_id=book.id)

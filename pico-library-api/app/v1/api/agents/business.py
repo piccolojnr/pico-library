@@ -9,7 +9,7 @@ from app.v1.api.books.dto import book_pagination_model
 
 
 def process_create_agent(data):
-    data["type"] = AgentType[data["type"]]
+    data["type"] = AgentType[data["type"].upper()]
     data["type"] = AgentType.OTHER if data["type"] == None else data["type"]
 
     agent = Agent(**data)
@@ -41,6 +41,8 @@ def process_update_agent(agent_id, data):
 
     for key, value in data.items():
         if value is not None and key != "id":
+            if key == "type":
+                value = AgentType[value.upper()]
             setattr(agent, key, value)
 
     db.session.commit()
@@ -59,11 +61,11 @@ def process_delete_agent(agent_id):
     return {"status": "success", "message": "agent deleted successfully"}
 
 
-def process_get_agents(page=1, per_page=10, type="null"):
-    if type == "null":
+def process_get_agents(page=1, per_page=10, type=None):
+    if not type:
         agents = Agent.query.paginate(page=page, per_page=per_page)
     else:
-        agent_type = AgentType[type]
+        agent_type = AgentType[type.upper()]
         agents = Agent.query.filter_by(type=agent_type).paginate(
             page=page, per_page=per_page
         )

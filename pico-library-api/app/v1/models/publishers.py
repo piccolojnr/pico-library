@@ -1,5 +1,6 @@
 from app.v1 import db
 
+from sqlalchemy.ext.hybrid import hybrid_property
 
 book_publishers_association = db.Table(
     "book_publishers",
@@ -23,6 +24,10 @@ class Publisher(db.Model):
     books = db.relationship(
         "Book", secondary=book_publishers_association, back_populates="publishers"
     )
+
+    @hybrid_property
+    def number_of_books(self):
+        return len(self.books)
 
     def __repr__(self):
         return f"<Publisher(name={self.name})>"

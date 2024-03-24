@@ -1,5 +1,5 @@
 from app.v1 import db
-
+from sqlalchemy.ext.hybrid import hybrid_property
 
 book_languages_association = db.Table(
     "book_languages",
@@ -19,13 +19,15 @@ class Language(db.Model):
     __tablename__ = "languages"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     code = db.Column(db.String, nullable=False, unique=True)
+    name = db.Column(db.String)
 
     books = db.relationship(
         "Book", secondary=book_languages_association, back_populates="languages"
     )
 
+    @hybrid_property
+    def number_of_books(self):
+        return len(self.books)
+
     def __repr__(self):
         return f"<Language {self.code}>"
-
-    def __init__(self, code):
-        self.code = code

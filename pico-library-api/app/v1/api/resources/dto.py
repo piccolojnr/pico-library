@@ -1,8 +1,10 @@
+from datetime import datetime
 from flask_restx import Model
-from flask_restx.fields import String, Integer, Boolean, Nested, List
+from flask_restx.fields import String, Integer, Boolean, Nested, List, Raw
 from flask_restx.reqparse import RequestParser
 from flask_restx.inputs import positive
 from app.v1.api.books.dto import book_model_short
+
 
 resource_model = Model(
     "Resource",
@@ -10,7 +12,7 @@ resource_model = Model(
         "id": Integer,
         "url": String,
         "size": Integer,
-        "modified": String,
+        "modified": String(attribute="modified_str"),
         "type": String(attribute="type_str"),
         "book": Nested(book_model_short),
     },
@@ -21,7 +23,7 @@ short_resource_model = Model(
         "id": Integer,
         "url": String,
         "size": Integer,
-        "modified": String,
+        "modified": String(attribute="modified_str"),
         "type": String(attribute="type_str"),
         "book_id": Integer,
     },

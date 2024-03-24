@@ -30,12 +30,9 @@ class Bookmark(db.Model):
     """
 
     __tablename__ = "bookmarks"
-    user_id = db.Column(
-        db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
-    )
-    book_id = db.Column(
-        db.Integer, db.ForeignKey("books.id", ondelete="CASCADE"), primary_key=True
-    )
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
+    book_id = db.Column(db.Integer, db.ForeignKey("books.id", ondelete="CASCADE"))
     status = db.Column(
         db.Enum(BookmarkStatus), nullable=False, default=BookmarkStatus.UNREAD
     )
@@ -45,6 +42,11 @@ class Bookmark(db.Model):
 
     user = db.relationship("User", back_populates="bookmarks")
     book = db.relationship("Book", back_populates="bookmarks")
+    __table_args__ = (db.UniqueConstraint("user_id", "book_id"),)
+
+    @hybrid_property
+    def status_str(self):
+        return self.status.value
 
     @hybrid_property
     def last_read_str(self):
