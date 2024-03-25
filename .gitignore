@@ -5,3 +5,5 @@ __pycache__/
 books_df.csv.gz
 seed.ipynb
 create_avatar.ipynb
+seed/
+tests/
