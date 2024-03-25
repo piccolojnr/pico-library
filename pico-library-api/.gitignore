@@ -3,4 +3,6 @@ venv/
 __pycache__/
 .pytest_cache/
 books_df.csv.gz
-pico-library-api/seed.ipynb
+seed.ipynb
+create_avatar.ipynb
+seed/
