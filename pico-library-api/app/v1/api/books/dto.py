@@ -24,7 +24,7 @@ book_model_short = Model(
     },
 )
 book_model = Model(
-    "BookShort",
+    "Book",
     {
         "id": Integer,
         "title": String,

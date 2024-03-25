@@ -42,7 +42,6 @@ MY_DOMAIN = os.environ.get("MY_DOMAIN")
 class Config:
     """Base configuration."""
 
-    SECRET_KEY = os.getenv("SECRET_KEY", "open sesame")
     BCRYPT_LOG_ROUNDS = 4
 
     TOKEN_EXPIRE_HOURS = 0
@@ -84,6 +83,8 @@ class ProductionConfig(Config):
     JWT_REFRESHMAXAGE = 604800
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", POSTSQL_PROD)
     PRESERVE_CONTEXT_ON_EXCEPTION = True
+    ENV = "production"
+    DEBUG = False
 
 
 ENV_CONFIG_DICT = dict(
