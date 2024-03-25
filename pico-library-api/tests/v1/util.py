@@ -630,3 +630,55 @@ def update_bookmark(test_client, auth_token, bookmark_id, **kwargs):
             headers={"Authorization": f"Bearer {auth_token}"},
         )
         return response
+
+
+def create_book(test_client, auth_token, data):
+    with test_client.application.test_request_context():
+        response = test_client.post(
+            url_for("api.books"),
+            headers={"Authorization": f"Bearer {auth_token}"},
+            json=data,
+            content_type="application/json",
+        )
+        return response
+
+
+def get_books(test_client, page=1, per_page=10):
+    with test_client.application.test_request_context():
+        response = test_client.get(url_for("api.books", page=page, per_page=per_page))
+        return response
+
+
+def get_book(test_client, book_id):
+    with test_client.application.test_request_context():
+        response = test_client.get(url_for("api.book", book_id=book_id))
+        return response
+
+
+def delete_book(test_client, auth_token, book_id):
+    with test_client.application.test_request_context():
+        response = test_client.delete(
+            url_for("api.book", book_id=book_id),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response
+
+
+def update_book(test_client, auth_token, book_id, data):
+    with test_client.application.test_request_context():
+        response = test_client.put(
+            url_for("api.book", book_id=book_id),
+            headers={"Authorization": f"Bearer {auth_token}"},
+            json=data,
+            content_type="application/json",
+        )
+        return response
+
+
+def clear_token(test_client, auth_token):
+    with test_client.application.test_request_context():
+        response = test_client.delete(
+            url_for("api.clear_tokens"),
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        return response

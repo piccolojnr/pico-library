@@ -46,9 +46,35 @@ agent_pagination_reqparse.add_argument(
     required=False,
     help="Agent type",
 )
-
+book_model_short = Model(
+    "BookShort",
+    {
+        "id": Integer,
+        "title": String,
+        "format": String,
+        "description": String,
+        "license": String,
+        "downloads": Integer,
+        "created_at": String(attribute="created_at_str"),
+        "updated_at": String(attribute="updated_at_str"),
+    },
+)
 agent_model = Model(
     "Agent",
+    {
+        "id": Integer,
+        "name": String,
+        "alias": String,
+        "books": List(Nested(book_model_short)),
+        "birth_date": String,
+        "death_date": String,
+        "webpage": String,
+        "agent_type": String,
+    },
+)
+
+short_agent_model = Model(
+    "ShortAgent",
     {
         "id": Integer,
         "name": String,
@@ -126,6 +152,6 @@ agent_pagination_model = Model(
         "total_pages": Integer,
         "items_per_page": Integer,
         "total_items": Integer,
-        "items": List(Nested(agent_model)),
+        "items": List(Nested(short_agent_model)),
     },
 )

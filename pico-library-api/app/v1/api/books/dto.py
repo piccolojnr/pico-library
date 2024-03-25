@@ -1,8 +1,14 @@
 from flask_restx import Model
-from flask_restx.fields import String, Integer, Boolean, Nested, List
+from flask_restx.fields import String, Integer, Boolean, Nested, List, Raw
 from flask_restx.reqparse import RequestParser
 from flask_restx.inputs import positive
-from app.v1.api.agents.dto import agent_model
+from app.v1.api.agents.dto import short_agent_model
+from app.v1.api.bookshelves.dto import short_bookshelf_model
+from app.v1.api.subjects.dto import subject_model
+from app.v1.api.languages.dto import langauge_model
+from app.v1.api.resources.dto import short_resource_model, create_resource_model
+from app.v1.api.publishers.dto import publisher_model
+
 
 book_model_short = Model(
     "BookShort",
@@ -26,6 +32,12 @@ book_model = Model(
         "description": String,
         "license": String,
         "downloads": Integer,
+        "publishers": List(Nested(publisher_model)),
+        "subjects": List(Nested(subject_model)),
+        "languages": List(Nested(langauge_model)),
+        "bookshelves": List(Nested(short_bookshelf_model)),
+        "agents": List(Nested(short_agent_model)),
+        "resources": List(Nested(short_resource_model)),
         "created_at": String(attribute="created_at_str"),
         "updated_at": String(attribute="updated_at_str"),
     },
@@ -77,16 +89,34 @@ book_pagination_model = Model(
 create_book_model = Model(
     "CreateBook",
     {
+        "id": Integer,
         "title": String,
         "format": String,
         "description": String,
         "license": String,
         "downloads": Integer,
-        "agents": List(Nested(agent_model)),
-        "subjects": List(String),
-        "bookshelves": List(String),
-        "languages": List(String),
-        "resources": List(String),
+        "publishers": List(Integer),
+        "subjects": List(Integer),
+        "languages": List(Integer),
+        "bookshelves": List(Integer),
+        "agents": List(Integer),
+        "resources": List(Nested(create_resource_model)),
+    },
+)
+
+update_book_model = Model(
+    "UpdateBook",
+    {
+        "title": String,
+        "format": String,
+        "description": String,
+        "license": String,
+        "downloads": Integer,
         "publishers": List(String),
+        "subjects": List(Integer),
+        "languages": List(Integer),
+        "bookshelves": List(Integer),
+        "agents": List(Integer),
+        "resources": List(Nested(create_resource_model)),
     },
 )

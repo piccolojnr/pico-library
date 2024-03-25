@@ -1,6 +1,14 @@
 from flask_pyjwt import current_token
 from app.v1.utils.pagination import _pagination_nav_header_links, _pagination_nav_links
-from app.v1.models import Book, User, Agent, Subject, Bookshelf
+from app.v1.models import (
+    Book,
+    User,
+    Agent,
+    Subject,
+    Bookshelf,
+    Language,
+    Publisher,
+)
 from flask_restx import abort, marshal
 from http import HTTPStatus
 from app.v1.services.recommendation_engine import generate_recommendations
@@ -9,29 +17,76 @@ from app.v1.api.books.dto import book_pagination_model, book_model
 from app.v1 import db
 from sqlalchemy import or_
 from app.v1.utils.functions import (
-    add_agents,
-    add_bookshelves,
-    add_languages,
     add_resources,
-    add_subjects,
-    add_publishers,
 )
 
 
+def get_languages(language_ids):
+    languages = []
+    for language_id in language_ids:
+        language = Language.query.filter_by(id=language_id).first()
+        if language:
+            languages.append(language)
+    return languages
+
+
+def get_publishers(publisher_ids):
+    publishers = []
+    for publisher_id in publisher_ids:
+        publisher = Publisher.query.filter_by(id=publisher_id).first()
+        if publisher:
+            publishers.append(publisher)
+    return publishers
+
+
+def get_agents(agent_ids):
+    agents = []
+    for agent_id in agent_ids:
+        agent = Agent.query.filter_by(id=agent_id).first()
+        if agent:
+            agents.append(agent)
+    return agents
+
+
+def get_subjects(subject_ids):
+    subjects = []
+    for subject_id in subject_ids:
+        subject = Subject.query.filter_by(id=subject_id).first()
+        if subject:
+            subjects.append(subject)
+    return subjects
+
+
+def get_bookshelves(bookshelf_ids):
+    bookshelves = []
+    for bookshelf_id in bookshelf_ids:
+        bookshelf = Bookshelf.query.filter_by(id=bookshelf_id).first()
+        if bookshelf:
+            bookshelves.append(bookshelf)
+    return bookshelves
+
+
 def process_create_book(data):
-    agents = add_agents(data["agents"]) if "agents" in data else []
-    bookshelves = add_bookshelves(data["bookshelves"]) if "bookshelves" in data else []
-    languages = add_languages(data["languages"]) if "languages" in data else []
+    agents = get_agents(data["agents"]) if "agents" in data else []
+    bookshelves = get_bookshelves(data["bookshelves"]) if "bookshelves" in data else []
+    languages = get_languages(data["languages"]) if "languages" in data else []
     resources = add_resources(data["resources"]) if "resources" in data else []
-    subjects = add_subjects(data["subjects"]) if "subjects" in data else []
-    publishers = add_publishers(data["publishers"]) if "publishers" in data else []
+    subjects = get_subjects(data["subjects"]) if "subjects" in data else []
+    publishers = get_publishers(data["publishers"]) if "publishers" in data else []
     data["agents"] = agents
     data["bookshelves"] = bookshelves
     data["languages"] = languages
     data["resources"] = resources
     data["subjects"] = subjects
     data["publishers"] = publishers
+
+    for key, value in data.items():
+        if value is None:
+            del data[key]
+
     book = Book(**data)
+    db.session.add(book)
+    db.session.commit()
     book_data = marshal(book, book_model)
     response = {
         "status": "success",

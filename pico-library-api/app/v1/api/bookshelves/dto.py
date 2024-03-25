@@ -6,11 +6,10 @@ from flask_restx import Model
 create_bookshelf_model = Model(
     "CreateBookshelf",
     {
-        "name": String,
+        "name": String(required=True),
         "description": String,
         "cover_image": String,
         "is_public": Boolean,
-        "public_id": Integer,
     },
 )
 
@@ -19,7 +18,7 @@ update_bookshelf_model = create_bookshelf_model.inherit(
     "UpdateBookshelf",
     {
         "name": String,
-        "description": String,  # Optional field
+        "description": String,
         "cover_image": String,
         "is_public": Boolean,
         "score": Integer,

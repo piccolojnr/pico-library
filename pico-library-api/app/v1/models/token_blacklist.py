@@ -4,6 +4,7 @@ from datetime import timezone
 
 from app.v1 import db
 from app.v1.utils.datetime_util import utc_now, dtaware_fromtimestamp
+from datetime import datetime
 
 
 class BlacklistedToken(db.Model):
@@ -27,3 +28,9 @@ class BlacklistedToken(db.Model):
     def check_blacklist(cls, token):
         exists = cls.query.filter_by(token=token).first()
         return True if exists else False
+
+    @classmethod
+    def delete_expired(cls):
+        cls.query.filter(cls.expires_at < datetime.now()).delete()
+        db.session.commit()
+        return True

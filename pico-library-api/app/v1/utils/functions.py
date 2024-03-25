@@ -28,11 +28,12 @@ def add_resources(resources):
             new_type = add_resource_type(resource_type)
         url = resource["url"]
         size = resource["size"]
-        modified = (
-            datetime.datetime.fromisoformat(resource["modified"])
-            if resource["modified"]
-            else None
-        )
+
+        if "modified" in resource.keys():
+            modified = datetime.datetime.fromisoformat(resource["modified"])
+        else:
+            modified = None
+
         new_resource = Resource.query.filter(Resource.url == url).first()
         if not new_resource:
             new_resource = Resource(

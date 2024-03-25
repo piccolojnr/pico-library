@@ -25,7 +25,7 @@ class Book(db.Model):
     format = db.Column(db.String)
     title = db.Column(db.String)
     description = db.Column(db.Text)
-    downloads = db.Column(db.Integer)
+    downloads = db.Column(db.Integer, default=0)
     license = db.Column(db.String)
     created_at = db.Column(db.DateTime, default=utc_now)
     updated_at = db.Column(db.DateTime, default=utc_now, onupdate=utc_now)

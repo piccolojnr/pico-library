@@ -9,7 +9,7 @@ from app.v1.api.books.dto import book_pagination_model
 
 
 def process_create_agent(data):
-    data["type"] = AgentType[data["type"].upper()]
+    data["type"] = AgentType[data["type"].upper()] if data["type"] else None
     data["type"] = AgentType.OTHER if data["type"] == None else data["type"]
 
     agent = Agent(**data)

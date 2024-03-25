@@ -3,8 +3,20 @@ from flask_restx import Model
 from flask_restx.fields import String, Integer, Boolean, Nested, List, Raw
 from flask_restx.reqparse import RequestParser
 from flask_restx.inputs import positive
-from app.v1.api.books.dto import book_model_short
 
+book_model_short = Model(
+    "BookShort",
+    {
+        "id": Integer,
+        "title": String,
+        "format": String,
+        "description": String,
+        "license": String,
+        "downloads": Integer,
+        "created_at": String(attribute="created_at_str"),
+        "updated_at": String(attribute="updated_at_str"),
+    },
+)
 
 resource_model = Model(
     "Resource",
@@ -32,7 +44,7 @@ short_resource_model = Model(
 create_resource_model = Model(
     "CreateResource",
     {
-        "url": String,
+        "url": String(required=True),
         "size": Integer,
         "modified": String,
         "type": String,

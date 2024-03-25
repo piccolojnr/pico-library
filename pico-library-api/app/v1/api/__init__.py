@@ -4,17 +4,18 @@ from flask import Blueprint
 from flask_restx import Api
 
 
-from app.v1.api.auth.endpoints import auth_ns
-from app.v1.api.user.endpoints import user_ns
-from app.v1.api.comments.endpoints import comments_ns
-from app.v1.api.books.endpoints import books_ns
-from app.v1.api.agents.endpoints import agents_ns
-from app.v1.api.bookshelves.endpoints import bookshelves_ns
-from app.v1.api.resources.endpoints import resources_ns
-from app.v1.api.subjects.endpoints import subjects_ns
-from app.v1.api.languages.endpoints import language_ns
-from app.v1.api.publishers.endpoints import publisher_ns
-from app.v1.api.bookmarks.endpoints import bookmark_ns
+from .auth.endpoints import auth_ns
+from .user.endpoints import user_ns
+from .comments.endpoints import comments_ns
+from .books.endpoints import books_ns
+from .agents.endpoints import agents_ns
+from .bookshelves.endpoints import bookshelves_ns
+from .resources.endpoints import resources_ns
+from .subjects.endpoints import subjects_ns
+from .languages.endpoints import language_ns
+from .publishers.endpoints import publisher_ns
+from .bookmarks.endpoints import bookmark_ns
+from .token.endpoints import token_ns
 
 api_bp = Blueprint("api", __name__, url_prefix="/api/v1")
 authorizations = {"Bearer": {"type": "apiKey", "in": "header", "name": "Authorization"}}
@@ -40,3 +41,4 @@ api.add_namespace(subjects_ns, path="/subjects")
 api.add_namespace(language_ns, path="/languages")
 api.add_namespace(publisher_ns, path="/publishers")
 api.add_namespace(bookmark_ns, path="/bookmarks")
+api.add_namespace(token_ns, path="/clear_tokens")
