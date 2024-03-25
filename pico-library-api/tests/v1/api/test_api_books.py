@@ -9,6 +9,7 @@ from tests.v1.util import (
     create_bookshelf,
     create_publisher,
     create_subject,
+    update_book,
     ADMIN_EMAIL,
 )
 
@@ -94,3 +95,20 @@ def test_get_books(db_session, client, admin_user):
     response = get_books(client, per_page=5)
     assert response.status_code == 200
     assert len(response.json["items"]) == 5
+
+
+def test_update_book(db_session, client, admin_user):
+    response = login_user(client, ADMIN_EMAIL)
+    assert response.status_code == 200
+    auth_token = response.json["auth"]["auth_token"]
+
+    response = create_book(client, auth_token, data=dict(title="book 1"))
+    assert response.status_code == 201
+    book_id = response.json["item"]["id"]
+
+    response = update_book(client, auth_token, book_id, data=dict(title="book 2"))
+    assert response.status_code == 200
+
+    response = get_book(client, book_id)
+    assert response.status_code == 200
+    assert response.json["title"] == "book 2"
