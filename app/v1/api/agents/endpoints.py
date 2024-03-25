@@ -13,14 +13,17 @@ from app.v1.api.agents.business import (
 )
 from app.v1.api.agents.dto import (
     agent_model,
+    short_agent_model,
     create_agent_reqparse,
     pagination_links_model,
     agent_pagination_model,
     agent_pagination_reqparse,
+    short_agent_model,
 )
 
 agents_ns = Namespace(name="books", validate=True)
 agents_ns.models[agent_model.name] = agent_model
+agents_ns.models[short_agent_model.name] = short_agent_model
 agents_ns.models[pagination_links_model.name] = pagination_links_model
 agents_ns.models[agent_pagination_model.name] = agent_pagination_model
 
