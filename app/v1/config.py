@@ -83,8 +83,6 @@ class ProductionConfig(Config):
     JWT_REFRESHMAXAGE = 604800
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", POSTSQL_PROD)
     PRESERVE_CONTEXT_ON_EXCEPTION = True
-    ENV = "production"
-    DEBUG = False
 
 
 ENV_CONFIG_DICT = dict(

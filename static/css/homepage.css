@@ -1,0 +1,28 @@
+#popular-authors .container .section-title,
+#popular-books .container .section-title {
+  margin-bottom: 40px;
+}
+#popular-authors .container .row img,
+#popular-books .container .row img {
+  height: 20rem;
+}
+
+#popular-authors .container .row .book-card,
+#popular-books .container .row .book-card {
+  width: 300px;
+}
+#popular-authors .container .row .card-body,
+#popular-books .container .row .card-body {
+  max-height: 15rem;
+  overflow: hidden;
+}
+
+#popular-authors .container .row .card-body .card-text,
+#popular-books .container .row .card-body .card-title,
+#popular-authors .container .row .card-body .card-text,
+#popular-books .container .row .card-body .card-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

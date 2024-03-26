@@ -66,9 +66,7 @@ update_bookmark_reqparse.add_argument(
 
 pagination_reqparse = RequestParser(bundle_errors=True)
 pagination_reqparse.add_argument("page", type=positive, default=1, required=False)
-pagination_reqparse.add_argument(
-    "per_page", type=positive, choices=[5, 10, 25, 50, 100], default=10, required=False
-)
+pagination_reqparse.add_argument("per_page", type=positive, default=10, required=False)
 
 pagination_links_model = Model(
     "Nav Links",

@@ -115,6 +115,14 @@ def get_user_recommendations(test_client, auth_token, page=1, per_page=10):
         return response
 
 
+def get_popular_books(test_client, page=1, per_page=10):
+    with test_client.application.test_request_context():
+        response = test_client.get(
+            url_for("api.popular_books", page=page, per_page=per_page),
+        )
+        return response
+
+
 def create_comment(test_client, auth_token, **kwargs):
     with test_client.application.test_request_context():
         response = test_client.post(

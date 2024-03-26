@@ -67,7 +67,7 @@ def process_get_agents(page=1, per_page=10, type=None):
     else:
         agent_type = AgentType[type.upper()]
         agents = Agent.query.filter_by(type=agent_type).paginate(
-            page=page, per_page=per_page
+            page=page, per_page=per_page, error_out=False
         )
 
     pagination = dict(
@@ -90,13 +90,40 @@ def process_get_agents(page=1, per_page=10, type=None):
     return response
 
 
+def process_get_popular_agents(page=1, per_page=10):
+    agents = Agent.query.filter(
+        Agent.type == AgentType.AUTHOR, Agent.books.any(Book.downloads > 20)
+    ).paginate(page=page, per_page=per_page, error_out=False)
+
+    pagination = dict(
+        page=agents.page,
+        items_per_page=agents.per_page,
+        total_pages=agents.pages,
+        total_items=agents.total,
+        items=agents.items,
+        has_next=agents.has_next,
+        has_prev=agents.has_prev,
+        next_num=agents.next_num,
+        prev_num=agents.prev_num,
+        links=[],
+    )
+    response_data = marshal(pagination, agent_pagination_model)
+    response_data["links"] = _pagination_nav_links(pagination, "popular_agents")
+    response = jsonify(response_data)
+    response.headers["Link"] = _pagination_nav_header_links(
+        pagination, "popular_agents"
+    )
+    response.headers["Total-Count"] = agents.pages
+    return response
+
+
 def process_get_agent_books(agent_id, page=1, per_page=10):
     agent = Agent.query.filter(Agent.id == agent_id).first()
     if not agent:
         abort(HTTPStatus.NOT_FOUND, "Agent not found")
 
     books = Book.query.filter(Book.agents.any(Agent.id == agent_id)).paginate(
-        page=page, per_page=per_page
+        page=page, per_page=per_page, error_out=False
     )
 
     pagination = dict(

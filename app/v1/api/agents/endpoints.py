@@ -10,6 +10,7 @@ from app.v1.api.agents.business import (
     process_get_agent_books,
     process_add_agent_book,
     process_remove_agent_book,
+    process_get_popular_agents,
 )
 from app.v1.api.agents.dto import (
     agent_model,
@@ -120,3 +121,16 @@ class AgentBookResource(Resource):
         Create agent's book.
         """
         return process_add_agent_book(agent_id, book_id)
+
+
+@agents_ns.route("/popular", endpoint="popular_agents")
+class PopularAgentsResource(Resource):
+    @agents_ns.expect(agent_pagination_reqparse)
+    def get(self):
+        """
+        Get popular agents.
+        """
+        args = agent_pagination_reqparse.parse_args()
+        page = args["page"]
+        per_page = args["per_page"]
+        return process_get_popular_agents(page, per_page)

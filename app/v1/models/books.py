@@ -51,6 +51,20 @@ class Book(db.Model):
     bookmarks = db.relationship("Bookmark", back_populates="book")
 
     @hybrid_property
+    def image(self):
+        from app.v1.models.resources import Resource
+        from sqlalchemy import or_
+
+        image_resource = Resource.query.filter(
+            Resource.book_id == self.id,
+            or_(
+                Resource.type_name.ilike("%\image/jpeg%"),
+                Resource.type_name.ilike("%\image/png%"),
+            ),
+        ).first()
+        return image_resource.url if image_resource else None
+
+    @hybrid_property
     def average_rating(self):
         ratings = self.ratings
         if ratings:

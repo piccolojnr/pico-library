@@ -1,3 +1,10 @@
+#!./venv/bin/python
+"""_summary_
+
+    Returns:
+        _type_: _description_
+    """
+
 import datetime
 import pandas as pd
 from app.v1.models import (
@@ -223,4 +230,8 @@ if __name__ == "__main__":
     flask_env = args.env
     num = int(args.num) if args.num else None
 
+    if not file_path:
+        print("Please provide an input file.")
+        sys.exit(1)
+    
     start_seeding(flask_env, file_path, num)

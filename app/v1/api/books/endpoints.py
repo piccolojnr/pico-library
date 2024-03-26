@@ -9,6 +9,8 @@ from app.v1.api.books.business import (
     process_get_book,
     process_get_books,
     process_update_book,
+    process_get_popular_books,
+    process_get_book_by_title,
 )
 from http import HTTPStatus
 from app.v1.api.books.dto import (
@@ -109,6 +111,19 @@ class GetRecommendations(Resource):
         page = args.get("page")
         per_page = args.get("per_page")
         return process_get_recommedations(page, per_page)
+
+
+@books_ns.route("/popular", endpoint="popular_books")
+class GetRecommendations(Resource):
+    @books_ns.expect(recommendation_pagination_reqparse)
+    def get(self):
+        """
+        Get popular books
+        """
+        args = recommendation_pagination_reqparse.parse_args()
+        page = args.get("page")
+        per_page = args.get("per_page")
+        return process_get_popular_books(page, per_page)
 
 
 @books_ns.route("/search", endpoint="book_search")

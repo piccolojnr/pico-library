@@ -76,7 +76,6 @@ pagination_reqparse.add_argument(
 pagination_reqparse.add_argument(
     "per_page",
     type=inputs.positive,
-    choices=[5, 10, 25, 50, 100],
     default=10,
     required=False,
 )

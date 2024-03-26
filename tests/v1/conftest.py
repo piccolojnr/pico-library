@@ -1,6 +1,5 @@
 """Global pytest fixtures."""
 
-import pandas as pd
 import pytest
 from tests.v1.util import EMAIL, PASSWORD, ADMIN_EMAIL
 from app.v1 import create_app, db as database

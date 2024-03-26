@@ -12,6 +12,7 @@ from app.v1.models import (
 from flask_restx import abort, marshal
 from http import HTTPStatus
 from app.v1.services.recommendation_engine import generate_recommendations
+from app.v1.services.popular_books_engine import generate_popular_books
 from flask import jsonify, url_for
 from app.v1.api.books.dto import book_pagination_model, book_model
 from app.v1 import db
@@ -187,6 +188,39 @@ def process_get_recommedations(page, per_page):
         return response_data
     else:
         abort(HTTPStatus.NOT_FOUND, "User not found")
+
+
+def process_get_popular_books(page=1, per_page=10):
+    recommendations, has_next, has_prev, total_pages = generate_popular_books(
+        page, per_page
+    )
+
+    pagination = dict(
+        page=page,
+        items_per_page=per_page,
+        total_pages=total_pages,
+        total_items=len(recommendations),
+        items=recommendations,
+        has_next=has_next,
+        has_prev=has_prev,
+        next_num=page + 1 if has_next else None,
+        prev_num=page - 1 if has_prev else None,
+        links=[],
+    )
+    response_data = marshal(pagination, book_pagination_model)
+    response_data["links"] = _pagination_nav_links(pagination, "popular_books")
+    response = jsonify(response_data)
+    response.headers["Link"] = _pagination_nav_header_links(pagination, "popular_books")
+    response.headers["Total-Count"] = total_pages
+    return response
+
+
+def process_get_book_by_title(title):
+    book = Book.query.filter_by(title=title).first()
+    if book:
+        return book
+    else:
+        abort(HTTPStatus.NOT_FOUND, "Book not found")
 
 
 def process_search_books(query="", criteria="title", page=1, per_page=10):

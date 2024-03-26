@@ -1,0 +1,41 @@
+<!-- templates/homepage.html -->
+{% extends 'layout.html' %} {% block title %}Home - pico-library{% endblock %}
+{% block style %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/homepage.css') }}"
+/>
+{% endblock %} {% block content %}
+
+<div id="home-jumbotron" class="p-5 mb-4 rounded-3">
+  <div class="container py-5">
+    <h1 class="display-5 fw-bold">Welcome to Pico Library</h1>
+    <p class="col-md-8 fs-4">
+      Explore a world of knowledge with Pico Library. Discover your next
+      favorite book, connect with fellow readers, and expand your horizons.
+    </p>
+    <a href="/books" class="btn btn-primary btn-lg">Browse Books</a>
+  </div>
+</div>
+
+<section id="popular-books">
+  <div class="container">
+    <h2 class="section-title">Popular Books</h2>
+    <div class="row align-items-start justify-content-center">
+      <!-- Add more books as needed -->
+    </div>
+  </div>
+
+  <section id="popular-authors">
+    <div class="container">
+      <h2 class="section-title">Popular Authors</h2>
+      <div class="row align-items-start justify-content-center">
+        <!-- Add more books as needed -->
+      </div>
+    </div>
+  </section>
+  <script src="{{ url_for('static', filename='js/homepage.js') }}"></script>
+
+  <!-- Add homepage content here -->
+  {% endblock %}
+</section>

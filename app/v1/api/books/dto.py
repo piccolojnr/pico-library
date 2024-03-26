@@ -9,7 +9,6 @@ from app.v1.api.languages.dto import langauge_model
 from app.v1.api.resources.dto import short_resource_model, create_resource_model
 from app.v1.api.publishers.dto import publisher_model
 
-
 book_model_short = Model(
     "BookShort",
     {
@@ -19,6 +18,7 @@ book_model_short = Model(
         "description": String,
         "license": String,
         "downloads": Integer,
+        "image": String,
         "created_at": String(attribute="created_at_str"),
         "updated_at": String(attribute="updated_at_str"),
     },
@@ -55,7 +55,7 @@ books_search_reqparse.add_argument(
 )
 books_search_reqparse.add_argument("page", type=positive, default=1, required=False)
 books_search_reqparse.add_argument(
-    "per_page", type=positive, choices=[5, 10, 25, 50, 100], default=10, required=False
+    "per_page", type=positive, default=10, required=False
 )
 
 
@@ -64,7 +64,7 @@ recommendation_pagination_reqparse.add_argument(
     "page", type=positive, default=1, required=False
 )
 recommendation_pagination_reqparse.add_argument(
-    "per_page", type=positive, choices=[5, 10, 25, 50, 100], default=10, required=False
+    "per_page", type=positive, default=10, required=False
 )
 
 pagination_links_model = Model(
