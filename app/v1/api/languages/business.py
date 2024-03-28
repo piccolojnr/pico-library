@@ -70,29 +70,14 @@ def process_get_language(language_id):
 
 
 def process_get_languages(page=1, per_page=10):
-    languages = Language.query.paginate(
-        page=page,
-        per_page=per_page,
-    )
+    languages = Language.query.all()
 
     pagination = dict(
-        page=languages.page,
-        items_per_page=languages.per_page,
-        total_pages=languages.pages,
-        total_items=languages.total,
-        items=languages.items,
-        has_next=languages.has_next,
-        has_prev=languages.has_prev,
-        next_num=languages.next_num,
-        prev_num=languages.prev_num,
+        items=languages,
         links=[],
     )
     response_data = marshal(pagination, languages_pagination_model)
-    response_data["links"] = _pagination_nav_links(pagination, "languages")
-    response = jsonify(response_data)
-    response.headers["Link"] = _pagination_nav_header_links(pagination, "languages")
-    response.headers["Total-Count"] = languages.pages
-    return response
+    return response_data
 
 
 def process_create_language_book(language_id, book_id):
@@ -151,7 +136,9 @@ def process_get_language_books(language_id, page=1, per_page=10):
     )
     response_data = marshal(pagination, book_pagination_model)
     response_data["links"] = _pagination_nav_links(
-        pagination, "language_books", language_id=language_id
+        pagination,
+        "language_books",
+        language_id=language_id,
     )
     response = jsonify(response_data)
     response.headers["Link"] = _pagination_nav_header_links(

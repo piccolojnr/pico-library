@@ -38,6 +38,8 @@ update_subject_parser.add_argument("score", type=positive, required=False)
 pagination_reqparse = RequestParser(bundle_errors=True)
 pagination_reqparse.add_argument("page", type=positive, default=1, required=False)
 pagination_reqparse.add_argument("per_page", type=positive, default=10, required=False)
+pagination_reqparse.add_argument("lan", type=str, default="all", required=False)
+pagination_reqparse.add_argument("q", type=str, default="", required=False)
 
 pagination_links_model = Model(
     "Nav Links",

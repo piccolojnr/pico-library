@@ -50,9 +50,7 @@ bookshelf_model = Model(
 )
 pagination_reqparser = RequestParser()
 pagination_reqparser.add_argument("page", type=int, default=1)
-pagination_reqparser.add_argument(
-    "per_page", type=int, choices=[5, 10, 25, 30, 100], default=10
-)
+pagination_reqparser.add_argument("per_page", type=int, default=10)
 
 pagination_links_model = Model(
     "Nav Links",

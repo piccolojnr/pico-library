@@ -1,11 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>500</title>
-</head>
-<body>
-    
-</body>
-</html>
+{% extends 'layout.html' %} {% block title %} 500 - Internal Server Error -
+pico-library{% endblock %} {% block content %}
+<style>
+  /* Add your custom CSS styles for the 404 page here */
+  .error-container {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    padding-top: 100px;
+    width: 100%;
+  }
+  .error-container h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+  }
+  .error-container p {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+</style>
+<div class="error-container">
+  <h1>500 - Internal Server Error</h1>
+  <p>Sorry, there was an error.</p>
+</div>
+{% endblock %}

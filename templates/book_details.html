@@ -1,2 +1,114 @@
-{% extends 'layout.html' %} {% block title %}Book - pico-library{% endblock %}
-{% block content %} Book Detail {% endblock %}
+{% extends 'layout.html' %} {% block title %} {{ book_data['title'] }} -
+pico-library{% endblock %} {% block content %}
+
+<div class="container py-5">
+  <div class="row">
+    <div class="col-md-4">
+      <img
+        src="{{ book_data.image }}"
+        alt="{{ book_data.title }}"
+        class="img-fluid mb-4"
+      />
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Book Details</h5>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <strong>Title:</strong> {{ book_data.title }}
+            </li>
+            <li class="list-group-item">
+              <strong>Format:</strong> {{ book_data.format }}
+            </li>
+            <li class="list-group-item">
+              <strong>License:</strong>
+              <a href="{{ book_data.license }}" target="_blank">
+                {{ book_data.license }}
+              </a>
+            </li>
+
+            <li class="list-group-item">
+              <strong>Downloads:</strong> {{ book_data.downloads }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8 card">
+      <div class="card-body">
+        <h5 class="card-title">Book Info</h5>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <p>{{ book_data.description }}</p>
+          </li>
+
+          <li class="list-group-item">
+            <h2>Authors</h2>
+            <ul>
+              {% for author in book_data.agents %}
+              <li>
+                <div>
+                  <a href="{{ author.webpage }}" target="_blank"
+                    >{{ author.name }}</a
+                  >
+                  <p><strong>type:</strong> {{ author.agent_type }}</p>
+                </div>
+              </li>
+              {% endfor %}
+            </ul>
+          </li>
+
+          <li class="list-group-item">
+            <h2>Publishers</h2>
+            <ul>
+              {% for publisher in book_data.publishers %}
+              <li>{{ publisher.name }}</li>
+              {% endfor %}
+            </ul>
+          </li>
+
+          <li class="list-group-item">
+            <h2>Subjects</h2>
+            <ul>
+              {% for subject in book_data.subjects %}
+              <li>
+                <a href="/subjects/{{ subject.id }}">{{ subject.name }}</a>
+              </li>
+              {% endfor %}
+            </ul>
+          </li>
+
+          <li class="list-group-item">
+            <h2>Bookshelves</h2>
+            <ul>
+              {% for bookshelf in book_data.bookshelves %}
+              <li>
+                <a href="/bookshelves/{{ bookshelf.id }}"
+                  >{{ bookshelf.name }}</a
+                >
+              </li>
+              {% endfor %}
+            </ul>
+          </li>
+
+          <li class="list-group-item">
+            <h2>Resources</h2>
+            <ul>
+              {% for resource in book_data.resources %}
+              <li>
+                <div>
+                  <a href="{{ resource.url }}" target="_blank"
+                    >{{ resource.type }}</a
+                  >
+                  <p><strong>type:</strong> {{ resource.type }}</p>
+                </div>
+              </li>
+              {% endfor %}
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

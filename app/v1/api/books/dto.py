@@ -32,6 +32,7 @@ book_model = Model(
         "description": String,
         "license": String,
         "downloads": Integer,
+        "image": String,
         "publishers": List(Nested(publisher_model)),
         "subjects": List(Nested(subject_model)),
         "languages": List(Nested(langauge_model)),
@@ -44,27 +45,22 @@ book_model = Model(
 )
 
 
-books_search_reqparse = RequestParser(bundle_errors=True)
-books_search_reqparse.add_argument("q", type=str, required=False, help="Search query")
-books_search_reqparse.add_argument(
+pagination_reqparse = RequestParser(bundle_errors=True)
+pagination_reqparse.add_argument("q", type=str, required=False, help="Search query")
+pagination_reqparse.add_argument(
     "criteria",
     type=str,
     choices=["title", "author", "subject", "shelf"],
     default="title",
     required=False,
 )
-books_search_reqparse.add_argument("page", type=positive, default=1, required=False)
-books_search_reqparse.add_argument(
-    "per_page", type=positive, default=10, required=False
-)
-
-
-recommendation_pagination_reqparse = RequestParser(bundle_errors=True)
-recommendation_pagination_reqparse.add_argument(
-    "page", type=positive, default=1, required=False
-)
-recommendation_pagination_reqparse.add_argument(
-    "per_page", type=positive, default=10, required=False
+pagination_reqparse.add_argument("page", type=positive, default=1, required=False)
+pagination_reqparse.add_argument("per_page", type=positive, default=10, required=False)
+pagination_reqparse.add_argument(
+    "lan",
+    type=str,
+    required=False,
+    default="all",
 )
 
 pagination_links_model = Model(

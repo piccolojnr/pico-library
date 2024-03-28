@@ -8,6 +8,7 @@ from .dto import bookshelf_model, bookshelf_pagination_model
 from flask_pyjwt import current_token
 from app.v1.utils.pagination import _pagination_nav_header_links, _pagination_nav_links
 from app.v1.api.books.dto import book_pagination_model
+from sqlalchemy import desc
 
 
 def process_create_bookshelf(data):
@@ -86,8 +87,10 @@ def process_delete_bookshelf(bookshelf_id):
 
 
 def process_get_bookshelves(page=1, per_page=10):
-    bookshelves = Bookshelf.query.filter(Bookshelf.is_public == True).paginate(
-        page=page, per_page=per_page
+    bookshelves = (
+        Bookshelf.query.filter(Bookshelf.is_public == True)
+        .order_by(desc(Bookshelf.score))
+        .paginate(page=page, per_page=per_page)
     )
     pagination = dict(
         page=bookshelves.page,

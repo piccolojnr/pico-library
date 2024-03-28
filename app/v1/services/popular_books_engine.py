@@ -1,9 +1,15 @@
 from . import calculate_score, calculate_review_score, calculate_popularity_score
-from app.v1.models import Book
+from app.v1.models import Book, Language
 
 
-def generate_popular_books(page=1, per_page=10):
-    books = Book.query.filter(Book.downloads > 50).all()
+def generate_popular_books(page=1, per_page=10, lan="all"):
+    if lan == "all":
+        books = Book.query.filter(Book.downloads > 50).all()
+    else:
+        books = Book.query.filter(
+            Book.downloads > 50,
+            Book.languages.any(Language.code == lan) if lan != "all" else None,
+        ).all()
 
     # Calculate scores for candidate books
     scores = {}

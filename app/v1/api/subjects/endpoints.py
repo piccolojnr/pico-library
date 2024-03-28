@@ -103,7 +103,8 @@ class SubjectBooksResource(Resource):
         args = pagination_reqparse.parse_args()
         page = args["page"]
         per_page = args["per_page"]
-        return process_get_subject_books(subject_id, page, per_page)
+        lan = args["lan"]
+        return process_get_subject_books(subject_id, page, per_page, lan)
 
 
 @subjects_ns.route("/<subject_id>/books/<book_id>", endpoint="subject_book")

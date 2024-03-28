@@ -1,9 +1,9 @@
-from app.v1.models import Subject, User, Book
+from app.v1.models import Subject, User, Book, Language
 from app.v1 import db
 from flask import jsonify, url_for
 from flask_restx import marshal, abort
 from http import HTTPStatus
-
+from sqlalchemy import desc
 from app.v1.utils.pagination import _pagination_nav_header_links, _pagination_nav_links
 from .dto import subject_model, subject_pagination_model
 from app.v1.api.books.dto import book_pagination_model
@@ -34,7 +34,7 @@ def process_get_subject(subject_id):
 
 
 def process_get_subjects(page=1, per_page=10):
-    subject = Subject.query.paginate(
+    subject = Subject.query.order_by(desc(Subject.score)).paginate(
         page=page,
         per_page=per_page,
     )
@@ -117,14 +117,23 @@ def process_delete_subject_book(subject_id, user_public_id):
     }
 
 
-def process_get_subject_books(subject_id, page=1, per_page=10):
+def process_get_subject_books(subject_id, page=1, per_page=10, lan="all"):
     subject = Subject.query.filter(Subject.id == subject_id).first()
     if not subject:
         abort(HTTPStatus.NOT_FOUND, "Subject not found")
-    books = Book.query.filter(Book.subjects.any(Subject.id == subject.id)).paginate(
-        page=page,
-        per_page=per_page,
-    )
+    if lan == "all":
+        books = Book.query.filter(Book.subjects.any(Subject.id == subject.id)).paginate(
+            page=page,
+            per_page=per_page,
+        )
+    else:
+        books = Book.query.filter(
+            Book.languages.any(Language.id == lan),
+            Book.subjects.any(Subject.id == subject.id),
+        ).paginate(
+            page=page,
+            per_page=per_page,
+        )
 
     pagination = dict(
         page=books.page,

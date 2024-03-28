@@ -24,10 +24,10 @@ from .bookmarks.dto import (
 from .books.dto import (
     book_model,
     book_pagination_model,
-    books_search_reqparse,
+    pagination_reqparse,
     book_model_short,
     create_book_model,
-    recommendation_pagination_reqparse,
+    pagination_reqparse,
     update_book_model,
 )
 from .bookshelves.dto import (
@@ -107,7 +107,7 @@ __all__ = [
     "agent_model",
     "short_resource_model",
     "agent_pagination_reqparse",
-    "books_search_reqparse",
+    "pagination_reqparse",
     "user_model",
     "comment_model",
     "create_subject_parser",
@@ -125,7 +125,7 @@ __all__ = [
     "bookshelf_pagination_model",
     "languages_pagination_model",
     "bookmarks_pagination_model",
-    "recommendation_pagination_reqparse",
+    "pagination_reqparse",
     "book_model_short",
     "pagination_reqparser",
     "publisher_model",

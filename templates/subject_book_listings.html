@@ -17,16 +17,15 @@
   >
   <option
 
-  value="books?lan=all"
->
-  all
-</option>
-  
+      value="subjects/{{ subject_id }}/books?lan=all"
+    >
+      all
+    </option>
     {% for language in languages['items'] %}
     <option
     {% if language.code == lan %} selected {% endif %} 
 
-      value="books?lan={{ language.code }}"
+      value="subjects/{{ subject_id }}/books?lan={{ language.code }}"
     >
       {{ language.code }}
     </option>
@@ -84,17 +83,17 @@
 <nav aria-label="Page navigation example">
   <ul class="pagination justify-content-center">
     <li class="page-item {{ 'disabled' if not pagination.has_prev }}">
-      <a class="page-link" href="/books?lan={{ lan }}&page={{ pagination.page - 1 }}">Previous</a>
+      <a class="page-link" href="/subjects/{{ subject_id }}/books?lan={{ lan }}&page={{ pagination.page - 1 }}">Previous</a>
     </li>
     {% for i in range(1, pagination.total_pages + 1) %}
       {% if i >= pagination.page - 1 and i <= pagination.page + 1 %}
         <li class="page-item {{ 'active' if i == pagination.page }}">
-          <a class="page-link" href="/books?lan={{ lan }}&page={{ i }}">{{ i }}</a>
+          <a class="page-link" href="/subjects/{{ subject_id }}/books?lan={{ lan }}&page={{ i }}">{{ i }}</a>
         </li>
       {% endif %}
     {% endfor %}
     <li class="page-item {{ 'disabled' if not pagination.has_next }}">
-      <a class="page-link" href="/books?lan={{ lan }}&page={{ pagination.page + 1 }}">Next</a>
+      <a class="page-link" href="/subjects/{{ subject_id }}/books?lan={{ lan }}&page={{ pagination.page + 1 }}">Next</a>
     </li>
   </ul>
 </nav>

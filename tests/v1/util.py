@@ -142,16 +142,10 @@ def retrive_comments(test_client, **kwargs):
         return response
 
 
-def search_books(test_client, query, criteria="title", page=1, per_page=10):
+def search_books(test_client, **kwargs):
     with test_client.application.test_request_context():
         response = test_client.get(
-            url_for(
-                "api.book_search",
-                q=query,
-                criteria=criteria,
-                page=page,
-                per_page=per_page,
-            ),
+            url_for("api.book_search", **kwargs),
         )
         return response
 

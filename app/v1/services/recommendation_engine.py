@@ -1,28 +1,22 @@
 from app.v1.models import (
     Book,
     User,
-    BookmarkStatus,
+    Language,
     Bookmark,
 )
 from . import calculate_score, calculate_review_score, calculate_popularity_score
 
 
-def generate_recommendations(user: User, page=1, per_page=10):
-    user_books_query: list[Bookmark] = Bookmark.query.filter(
-        Bookmark.user_id == user.id,
-        Bookmark.status.in_(
-            [
-                BookmarkStatus.READ,
-                BookmarkStatus.CURRENTLY_READING,
-                BookmarkStatus.WANT_TO_READ,
-                BookmarkStatus.WANT_TO_READ,
-            ]
-        ),
-    ).all()
-
-    books = Book.query.all()
-
-    unread_books = [book for book in books if book not in user_books_query]
+def generate_recommendations(user: User, page=1, per_page=10, lan="all"):
+    if lan == "all":
+        unread_books = Book.query.filter(
+            ~Book.bookmarks.any(Bookmark.user_id == user.id)
+        ).all()
+    else:
+        unread_books = Book.query.filter(
+            ~Book.bookmarks.any(Bookmark.user_id == user.id),
+            Book.languages.any(Language.code == lan),
+        ).all()
 
     # Calculate scores for candidate books
     scores = {}

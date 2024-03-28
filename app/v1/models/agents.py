@@ -42,6 +42,12 @@ class Agent(db.Model):
     )
 
     @hybrid_property
+    def agent_books(self):
+        from app.v1.models.books import Book
+
+        return Book.query.filter(Book.agents.any(Agent.id == self.id)).limit(5).all()
+
+    @hybrid_property
     def agent_type(self):
         return self.type.value
 

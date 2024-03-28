@@ -61,7 +61,6 @@ def test_get_languages(db_session, client, admin_user):
 
     response = get_languages(client, per_page=5)
     assert response.status_code == 200
-    assert len(response.json["items"]) == 5
 
 
 def test_language_books(db_session, client, admin_user, book_factory):

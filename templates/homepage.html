@@ -9,33 +9,124 @@
 
 <div id="home-jumbotron" class="p-5 mb-4 rounded-3">
   <div class="container py-5">
-    <h1 class="display-5 fw-bold">Welcome to Pico Library</h1>
+    <h1 class="display-5 fw-bold">Discover Your Next Favorite Book</h1>
     <p class="col-md-8 fs-4">
-      Explore a world of knowledge with Pico Library. Discover your next
-      favorite book, connect with fellow readers, and expand your horizons.
+      Welcome to Pico Library, where adventure awaits on every page. Explore our
+      vast collection, connect with fellow book lovers, and embark on
+      unforgettable literary journeys.
     </p>
-    <a href="/books" class="btn btn-primary btn-lg">Browse Books</a>
+    <a href="/books" class="btn btn-primary btn-lg">Start Exploring</a>
   </div>
 </div>
 
-<section id="popular-books">
-  <div class="container">
-    <h2 class="section-title">Popular Books</h2>
-    <div class="row align-items-start justify-content-center">
-      <!-- Add more books as needed -->
-    </div>
-  </div>
-
-  <section id="popular-authors">
+<div class="container featured-section">
+  <section id="popular-books">
     <div class="container">
-      <h2 class="section-title">Popular Authors</h2>
+      <h2 class="section-title">Popular Picks</h2>
       <div class="row align-items-start justify-content-center">
-        <!-- Add more books as needed -->
+        {% for book in popular_books["items"] %}
+        <div class="book-card col-md-4">
+          <div class="card mb-4">
+            {% if book.image %}
+
+            <img
+              src="{{ book.image }}"
+              class="card-img-top bd-placeholder-img img-thumbnail"
+              alt="{{ book.title }}"
+            />
+            {% else %}
+
+            <svg
+              class="card-img-top bd-placeholder-img img-thumbnail"
+              xmlns="http://www.w3.org/2000/svg"
+              role="img"
+              preserveAspectRatio="xMidYMid slice"
+              focusable="false"
+            >
+              <rect width="100%" height="100%" fill="#868e96"></rect>
+              <text x="38%" y="53%" fill="#dee2e6">No Image</text>
+            </svg>
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ book.title }}</h5>
+              <p class="card-text">{{ book.description }}</p>
+              <a
+                href="/books/{{ book.id }}"
+                data-id="{{ book.id }}"
+                data-title="{{ book.title }}"
+                class="btn border"
+              >
+                Read More
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
       </div>
     </div>
   </section>
-  <script src="{{ url_for('static', filename='js/homepage.js') }}"></script>
 
-  <!-- Add homepage content here -->
-  {% endblock %}
-</section>
+  <section id="popular-authors">
+    <div class="container">
+      <h2 class="section-title">Meet Renowned Authors</h2>
+      <div class="row align-items-start justify-content-center">
+        {% for author in popular_agents['items'] %}
+        <div class="author-card col-md-4">
+          <div class="card mb-4">
+            <div class="card-body">
+              <h5 class="card-title">{{ author.name }}</h5>
+              <p class="card-text">
+                {{ author.birth_date }} - {{ author.death_date }}
+              </p>
+              <p class="card-text">{{ author.alias }}</p>
+              <a
+                href="/agents/{{ author.id }}"
+                data-id="{{ author.id }}"
+                data-title="{{ author.name }}"
+                class="btn btn-primary"
+              >
+                Read More
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section id="popular-bookshelves">
+    <div class="container">
+      <h2 class="section-title">Discover Unique Bookshelves</h2>
+      <div class="row align-items-start justify-content-center">
+        {% for shelf in bookshelves['items'] %}
+        <div class="bookshelve-card card">
+          <a href="/bookshelves/{{ shelf.id }}/books">
+            <div class="card-body">{{ shelf.name }}</div>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section id="popular-subjects">
+    <div class="container">
+      <h2 class="section-title">Explore Fascinating Subjects</h2>
+      <div class="row align-items-start justify-content-center">
+        {% for subject in subjects['items'] %}
+        <div class="bookshelve-card card">
+          <a href="/subjects/{{ subject.id }}/books">
+            <div class="card-body">{{ subject.name }}</div>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="{{ url_for('static', filename='js/homepage.js') }}"></script>
+
+<!-- Add homepage content here -->
+{% endblock %}~
