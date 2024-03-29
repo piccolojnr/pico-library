@@ -11,7 +11,6 @@ from .business import (
     process_update_bookshelf,
     process_create_bookshelf_book_relationship,
     process_delete_bookshelf_book_relationship,
-    process_get_bookshelf_books,
 )
 from .dto import (
     create_bookshelf_model,
@@ -42,7 +41,8 @@ class BookshelvesResource(Resource):
         args = pagination_reqparser.parse_args()
         page = args["page"]
         per_page = args["per_page"]
-        return process_get_bookshelves(page, per_page)
+        q = args["q"]
+        return process_get_bookshelves(page, per_page, q)
 
     @require_token(scope={"is_admin": True})
     @bookshelves_ns.doc(security="Bearer")
@@ -95,15 +95,6 @@ class BookshelfResource(Resource):
         """
         data = request.get_json()
         return process_update_bookshelf(bookshelf_id, data)
-
-
-@bookshelves_ns.route("/<bookshelf_id>/books", endpoint="bookshelf_books")
-class BookshelfBooksResource(Resource):
-    def get(self, bookshelf_id):
-        """
-        Get bookshelf's books.
-        """
-        return process_get_bookshelf_books(bookshelf_id)
 
 
 @bookshelves_ns.route("<bookshelf_id>/books/<book_id>", endpoint="bookshelf_book")

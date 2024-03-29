@@ -1,106 +1,205 @@
 from flask import render_template, redirect, url_for
 from . import web_bp
-from flask import request
+from flask import request, abort
 import requests
 
 
-# Homepage
-@web_bp.route("/")
-def index():
-    try:
-        base_url = request.url_root
-        response = requests.get(base_url + "api/v1/books/popular?per_page=3")
-        popular_books = response.json()
-        response = requests.get(base_url + "api/v1/agents/popular?per_page=3")
-        popular_agents = response.json()
-        response = requests.get(base_url + "api/v1/bookshelves?per_page=10")
-        bookshelves = response.json()
-        response = requests.get(base_url + "api/v1/subjects?per_page=10")
-        subjects = response.json()
+def get_resource(api_url):
+    base_url = request.url_root
+    response = requests.get(base_url + api_url)
+    if response.status_code == 200:
+        return response.json()
+    elif response.status_code == 404:
+        abort(404)
+    else:
+        abort(500)  # Handle API request errors gracefully
 
-        return render_template(
-            "homepage.html",
-            popular_books=popular_books,
-            popular_agents=popular_agents,
-            bookshelves=bookshelves,
-            subjects=subjects,
-        )
-    except Exception as e:
-        print(e)
-        return redirect(url_for("site.internal_server_error"))
+
+def get_breadcrumb_data(resource_name, resource_id, url_name):
+    if resource_id:
+        resource = get_resource(f"api/v1/{resource_name}/{resource_id}")
+        if resource:
+            return {
+                "name": f"{resource_name.capitalize()}: {resource['name']}",
+                "url": url_for("site.books", **{url_name: resource_id}),
+                "active": "",
+            }
+    return None
+
+
+# Homepage
+@web_bp.route("/", endpoint="index", methods=["GET"])
+def index():
+    popular_books = get_resource("api/v1/books/popular?per_page=3")
+    popular_agents = get_resource("api/v1/agents/popular?per_page=3")
+    bookshelves = get_resource("api/v1/bookshelves?per_page=10")
+    subjects = get_resource("api/v1/subjects?per_page=10")
+
+    return render_template(
+        "homepage.html",
+        popular_books=popular_books,
+        popular_agents=popular_agents,
+        bookshelves=bookshelves,
+        subjects=subjects,
+    )
 
 
 # Book Listings
-@web_bp.route("/books")
+@web_bp.route("/books", endpoint="books", methods=["GET"])
 def book_listings():
-    # get parameters page
+    # Get parameters
     page = request.args.get("page", 1, type=int)
-    lan = request.args.get("lan", "all", type=str)
-
-    # Logic to fetch and display book listings
-    base_url = request.url_root
-    response = requests.get(
-        base_url + f"api/v1/books?page={page}&per_page=10&lan={lan}"
+    lan = request.args.get("lan", None, type=str)
+    q = request.args.get("q", None, type=str)
+    agent_id = request.args.get("agent", None, type=str)
+    subject_id = request.args.get("subject", None, type=str)
+    bookshelf_id = request.args.get("bookshelf", None, type=str)
+    # Get breadcrumb data
+    breadcrumbs = [
+        {"name": "Home", "url": url_for("site.index"), "active": ""},
+        {"name": "Books", "url": url_for("site.books"), "active": ""},
+    ]
+    breadcrumbs.extend(
+        [
+            get_breadcrumb_data("agents", agent_id, "agent"),
+            get_breadcrumb_data("subjects", subject_id, "subject"),
+            get_breadcrumb_data("bookshelves", bookshelf_id, "bookshelf"),
+            (
+                {
+                    "name": f"Query: {q}",
+                    "url": url_for("site.books", q=q),
+                    "active": "",
+                }
+                if q
+                else None
+            ),
+        ]
     )
-    pagination = response.json()
-    response = requests.get(base_url + "api/v1/languages")
-    languages = response.json()
+    breadcrumbs = [b for b in breadcrumbs if b]  # Remove None values
+
+    lan_ = f"&lan={lan}" if lan and lan != "all" else ""
+    q_ = f"&q={q}" if q else ""
+    agent_id = f"&agent={agent_id}" if agent_id else ""
+    subject_id = f"&subject={subject_id}" if subject_id else ""
+    bookshelf_id = f"&bookshelf={bookshelf_id}" if bookshelf_id else ""
+    # Get pagination data
+    pagination = get_resource(
+        f"api/v1/books?page={page}&per_page=10{lan_}{q_}{agent_id}{subject_id}{bookshelf_id}"
+    )
+    languages = get_resource("api/v1/languages")
+
+    # Mark active breadcrumb
+    breadcrumbs[-1]["active"] = "active"
+
     return render_template(
-        "book_listings.html", pagination=pagination, languages=languages, lan=lan
+        "listings/book_listings.html",
+        pagination=pagination,
+        languages=languages,
+        lan=lan,
+        breadcrumbs=breadcrumbs,
     )
 
 
-@web_bp.route("/agents")
+@web_bp.route("/agents", endpoint="agents", methods=["GET"])
 def agent_listings():
     # get parameters page
 
     page = request.args.get("page", 1, type=int)
-    agent_type = request.args.get("agent_type", "all", type=str)
-    agent_type = f"&type={agent_type}" if agent_type and agent_type != "all" else ""
-    # Logic to fetch and display book listings
-    base_url = request.url_root
-    response = requests.get(
-        base_url + f"api/v1/agents?page={page}&per_page=10" + agent_type
-    )
-    pagination = response.json()
+    q = request.args.get("q", None, type=str)
+
+    breadcrumbs = [
+        {"name": "Home", "url": url_for("site.index"), "active": ""},
+        {"name": "Agents", "url": url_for("site.agents"), "active": ""},
+        (
+            {
+                "name": f"Query: {q}",
+                "url": url_for("site.agents", q=q),
+                "active": "",
+            }
+            if q
+            else None
+        ),
+    ]
+    breadcrumbs = [b for b in breadcrumbs if b]  # Remove None values
+    breadcrumbs[-1]["active"] = "active"
+
+    q = f"&q={q}" if q else ""
+    agent_type = request.args.get("agent_type", None, type=str)
+
+    agent_type_ = f"&type={agent_type}" if agent_type and agent_type != "all" else ""
+
+    pagination = get_resource(f"api/v1/agents?page={page}&per_page=10{agent_type_}{q}")
+
     return render_template(
-        "agent_listings.html", pagination=pagination, agent_type=agent_type
+        "listings/agent_listings.html",
+        pagination=pagination,
+        agent_type=agent_type,
+        breadcrumbs=breadcrumbs,
     )
 
 
-@web_bp.route("/subjects")
+@web_bp.route("/subjects", endpoint="subjects", methods=["GET"])
 def subject_listings():
     # get parameters page
     page = request.args.get("page", 1, type=int)
+    q = request.args.get("q", None, type=str)
+
+    breadcrumbs = [
+        {"name": "Home", "url": url_for("site.index"), "active": ""},
+        {"name": "Subjects", "url": url_for("site.subjects"), "active": ""},
+        (
+            {
+                "name": f"Query: {q}",
+                "url": url_for("site.subjects", q=q),
+                "active": "",
+            }
+            if q
+            else None
+        ),
+    ]
+    breadcrumbs = [b for b in breadcrumbs if b]  # Remove None values
+    breadcrumbs[-1]["active"] = "active"
+
+    q = f"&q={q}" if q else ""
     # Logic to fetch and display book listings
-    base_url = request.url_root
-    response = requests.get(base_url + f"api/v1/subjects?page={page}&per_page=30")
-    pagination = response.json()
+    pagination = get_resource(f"api/v1/subjects?page={page}&per_page=30{q}")
 
-    return render_template("subject_listings.html", pagination=pagination)
-
-
-@web_bp.route("/subjects/<int:subject_id>/books")
-def subject_book_listings(subject_id):
-    # get parameters page
-    lan = request.args.get("lan", "all", type=str)
-
-    page = request.args.get("page", 1, type=int)
-    # Logic to fetch and display book listings
-    base_url = request.url_root
-    response = requests.get(
-        base_url
-        + f"api/v1/subjects/{subject_id}/books?page={page}&per_page=10&lan={lan}"
-    )
-    pagination = response.json()
-    response = requests.get(base_url + "api/v1/languages")
-    languages = response.json()
     return render_template(
-        "subject_book_listings.html",
-        subject_id=subject_id,
+        "listings/subject_listings.html", pagination=pagination, breadcrumbs=breadcrumbs
+    )
+
+
+@web_bp.route("/bookshelves", endpoint="bookshelves", methods=["GET"])
+def bookshelf_listings():
+    # get parameters page
+    page = request.args.get("page", 1, type=int)
+
+    q = request.args.get("q", None, type=str)
+
+    breadcrumbs = [
+        {"name": "Home", "url": url_for("site.index"), "active": ""},
+        {"name": "Bookshelves", "url": url_for("site.bookshelves"), "active": ""},
+        (
+            {
+                "name": f"Query: {q}",
+                "url": url_for("site.bookshelves", q=q),
+                "active": "",
+            }
+            if q
+            else None
+        ),
+    ]
+    breadcrumbs = [b for b in breadcrumbs if b]  # Remove None values
+    breadcrumbs[-1]["active"] = "active"
+
+    q = f"&q={q}" if q else ""
+    # Logic to fetch and display book listings
+    pagination = get_resource(f"api/v1/bookshelves?page={page}&per_page=30{q}")
+
+    return render_template(
+        "listings/bookshelf_listings.html",
         pagination=pagination,
-        languages=languages,
-        lan=lan,
+        breadcrumbs=breadcrumbs,
     )
 
 
@@ -108,28 +207,21 @@ def subject_book_listings(subject_id):
 @web_bp.route("/books/<int:book_id>")
 def book_details(book_id):
 
-    url = request.url_root + "api/v1/books/" + str(book_id)
-    response = requests.get(url)
-    if response.status_code != 200:
-        return redirect(url_for("web.book_listings"))
-    book_data = response.json()
+    book_data = get_resource(f"api/v1/books/{book_id}")
 
     # Logic to fetch and display book details for the given book_id
-    return render_template("book_details.html", book_id=book_id, book_data=book_data)
+    return render_template(
+        "details/book_details.html", book_id=book_id, book_data=book_data
+    )
 
 
 @web_bp.route("/agents/<int:agent_id>")
 def agent_details(agent_id):
     # Logic to fetch and display agent details for the given agent_id
-    url = request.url_root + "api/v1/agents/" + str(agent_id)
-    response = requests.get(url)
-    if response.status_code != 200:
-        return redirect(url_for("web.book_listings"))
-    agent_data = response.json()
-    print(agent_data)
+    agent_data = get_resource(f"api/v1/agents/{agent_id}")
 
     return render_template(
-        "agent_details.html", agent_data=agent_data, agent_id=agent_id
+        "details/agent_details.html", agent_data=agent_data, agent_id=agent_id
     )
 
 
@@ -148,46 +240,39 @@ def register():
 @web_bp.route("/profile/<username>")
 def user_profile(username):
     # Logic to fetch and display user profile for the given username
-    return render_template("user_profile.html", username=username)
+    return render_template("user/user_profile.html", username=username)
 
 
 # Bookshelves Management
-@web_bp.route("/bookshelves")
+@web_bp.route("admin/bookshelves")
 def bookshelves_management():
     # Logic to manage bookshelves
-    return render_template("bookshelves_management.html")
-
-
-@web_bp.route("/bookshelves/<int:bookshelf_id>")
-def bookshelf(bookshelf_id):
-    # Logic to fetch and display book details for the given bookshelf_id
-    return render_template("bookshelf.html", bookshelf_id=bookshelf_id)
+    return render_template("admin/bookshelves_management.html")
 
 
 # Bookmarks Management
-@web_bp.route("/bookmarks")
+@web_bp.route("admin/bookmarks")
 def bookmarks_management():
     # Logic to manage bookmarks
-    return render_template("bookmarks_management.html")
+    return render_template("admin/bookmarks_management.html")
 
 
 # Recommendations
 @web_bp.route("/recommendations")
 def recommendations():
     # Logic to provide book recommendations
-    return render_template("recommendations.html")
+    return render_template("user/recommendations.html")
 
 
 # Admin Panel
 @web_bp.route("/admin")
 def admin_panel():
     # Logic for admin panel (authentication required)
-    return render_template("admin_panel.html")
+    return render_template("admin/admin_panel.html")
 
 
 @web_bp.route("/404")
 def page_not_found():
-    print("this is a 404 page")
     return render_template("errors/404.html")
 
 

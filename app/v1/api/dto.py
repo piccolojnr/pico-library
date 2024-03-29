@@ -7,7 +7,7 @@ from app.v1.api import api
 from .agents.dto import (
     agent_model,
     agent_pagination_model,
-    agent_pagination_reqparse,
+    pagination_reqparse,
     create_agent_reqparse,
 )
 from .auth.dto import (
@@ -106,7 +106,7 @@ __all__ = [
     "create_bookmark_reqparse",
     "agent_model",
     "short_resource_model",
-    "agent_pagination_reqparse",
+    "pagination_reqparse",
     "pagination_reqparse",
     "user_model",
     "comment_model",

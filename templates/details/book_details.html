@@ -56,7 +56,14 @@ pico-library{% endblock %} {% block content %}
               {% endfor %}
             </ul>
           </li>
-
+          <li class="list-group-item">
+            <h2>Languages</h2>
+            <ul>
+              {% for language in book_data.languages %}
+              <li>{{ language.code }}</li>
+              {% endfor %}
+            </ul>
+          </li>
           <li class="list-group-item">
             <h2>Publishers</h2>
             <ul>

@@ -126,15 +126,27 @@ def process_update_book(book_id, data):
     }
 
 
-def process_get_books(page, per_page, lan="all"):
-
-    if lan == "all":
-        books = Book.query.paginate(error_out=False, page=page, per_page=per_page)
+def process_get_books(
+    page, per_page, lan=None, subject=None, agent=None, bookshelf=None, q=None
+):
+    filter_conditions = []
+    if lan and lan != "all":
+        filter_conditions.append(Book.languages.any(Language.code == lan))
+    if q:
+        filter_conditions.append(Book.title.ilike(f"%{q}%"))
+    if subject:
+        filter_conditions.append(Book.subjects.any(Subject.id == subject))
+    if agent:
+        filter_conditions.append(Book.agents.any(Agent.id == agent))
+    if bookshelf:
+        filter_conditions.append(Book.bookshelves.any(Bookshelf.id == bookshelf))
+    if filter_conditions:
+        books = Book.query.filter(*filter_conditions)
     else:
-        books = Book.query.filter(Book.languages.any(Language.code == lan)).paginate(
-            error_out=False, page=page, per_page=per_page
-        )
-    print(books.items)
+        books = Book.query
+
+    books = books.paginate(page=page, per_page=per_page)
+
     pagination = dict(
         page=books.page,
         items_per_page=books.per_page,
@@ -220,89 +232,4 @@ def process_get_popular_books(page=1, per_page=10, lan="en"):
     response = jsonify(response_data)
     response.headers["Link"] = _pagination_nav_header_links(pagination, "popular_books")
     response.headers["Total-Count"] = total_pages
-    return response
-
-
-def process_get_book_by_title(title):
-    book = Book.query.filter_by(title=title).first()
-    if book:
-        return book
-    else:
-        abort(HTTPStatus.NOT_FOUND, "Book not found")
-
-
-def process_search_books(query="", criteria="title", page=1, per_page=10, lan="all"):
-    query = query.lower() if query else ""
-
-    if criteria == "title":
-        if lan == "all":
-            books = Book.query.filter(Book.title.ilike(f"%{query}%")).paginate(
-                error_out=False, page=page, per_page=per_page
-            )
-        else:
-            books = Book.query.filter(
-                Book.languages.any(Language.code == lan), Book.title.ilike(f"%{query}%")
-            ).paginate(error_out=False, page=page, per_page=per_page)
-    elif criteria == "author":
-        if lan == "all":
-            books = Book.query.filter(
-                or_(
-                    Book.agents.any(Agent.name.ilike(f"%{query}%")),
-                    Book.agents.any(Agent.alias.ilike(f"%{query}%")),
-                )
-            ).paginate(error_out=False, page=page, per_page=per_page)
-        else:
-            books = Book.query.filter(
-                Book.languages.any(Language.code == lan),
-                or_(
-                    Book.agents.any(Agent.name.ilike(f"%{query}%")),
-                    Book.agents.any(Agent.alias.ilike(f"%{query}%")),
-                ),
-            ).paginate(error_out=False, page=page, per_page=per_page)
-    elif criteria == "subject":
-        if lan == "all":
-            books = Book.query.filter(
-                Book.subjects.any(Subject.name.ilike(f"%{query}%"))
-            ).paginate(error_out=False, page=page, per_page=per_page)
-        else:
-            books = Book.query.filter(
-                Book.languages.any(Language.code == lan),
-                Book.subjects.any(Subject.name.ilike(f"%{query}%")),
-            ).paginate(error_out=False, page=page, per_page=per_page)
-    elif criteria == "shelf":
-        if lan == "all":
-            books = Book.query.filter(
-                Book.bookshelves.any(Bookshelf.name.ilike(f"%{query}%"))
-            ).paginate(error_out=False, page=page, per_page=per_page)
-        else:
-            books = Book.query.filter(
-                Book.languages.any(Language.code == lan),
-                Book.bookshelves.any(Bookshelf.name.ilike(f"%{query}%")),
-            ).paginate(error_out=False, page=page, per_page=per_page)
-    else:
-        if lan == "all":
-            books = Book.query.filter(Book.title.ilike(f"%{query}%")).paginate(
-                error_out=False, page=page, per_page=per_page
-            )
-        else:
-            books = Book.query.filter(
-                Book.languages.any(Language.code == lan), Book.title.ilike(f"%{query}%")
-            ).paginate(error_out=False, page=page, per_page=per_page)
-    pagination = dict(
-        page=books.page,
-        items_per_page=books.per_page,
-        total_pages=books.pages,
-        total_items=books.total,
-        items=books.items,
-        has_next=books.has_next,
-        has_prev=books.has_prev,
-        next_num=books.next_num,
-        prev_num=books.prev_num,
-        links=[],
-    )
-    response_data = marshal(pagination, book_pagination_model)
-    response_data["links"] = _pagination_nav_links(pagination, "book_search")
-    response = jsonify(response_data)
-    response.headers["Link"] = _pagination_nav_header_links(pagination, "book_search")
-    response.headers["Total-Count"] = books.pages
     return response

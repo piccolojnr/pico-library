@@ -1,0 +1,123 @@
+<!-- templates/homepage.html -->
+{% extends 'layout.html' %} {% block title %}Books - pico-library{% endblock %}
+{% block style %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/book_listing.css') }}"
+/>
+{% endblock %} {% block content %}
+
+<div class="container py-5">
+  <!-- breadcrumbs -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      {% for crumb in breadcrumbs %}
+      <li
+        class="breadcrumb-item {{ crumb.active }}"
+        aria-current="{% if crumb.active == 'active' %}page{% endif %}"
+      >
+        {% if crumb.active == "active" %} {{crumb.name}} {% else %}
+        <a href="{{ crumb.url }}"> {{crumb.name}} </a>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </nav>
+  <!-- search input -->
+  <form class="d-flex mb-4" action="" id="search-bar">
+    <input
+      class="form-control from-control-sm mr-2"
+      type="search"
+      placeholder="Search"
+      aria-label="Search"
+    />
+    <button class="btn btn-outline-success" type="submit">Search</button>
+  </form>
+
+  <h1 class="mb-4">Books</h1>
+  <!-- filtering by language -->
+  <select
+    class="form-select mb-4"
+    aria-label="languages"
+    id="language-select"
+    style="width: fit-content !important"
+  >
+    <option value="all">all</option>
+
+    {% for language in languages['items'] %}
+    <option value="{{ language.code }}">{{ language.code }}</option>
+    {% endfor %}
+  </select>
+  <input
+    type="hidden"
+    name="language"
+    id="language-selected-code"
+    value="{{ lan }}"
+  />
+
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for book in pagination['items'] %}
+    <div class="card book-card h-100">
+      {% if book.image %}
+
+      <img
+        src="{{ book.image }}"
+        class="card-img-top bd-placeholder-img img-thumbnail"
+        alt="{{ book.title }}"
+      />
+      {% else %}
+
+      <svg
+        class="card-img-top bd-placeholder-img img-thumbnail"
+        xmlns="http://www.w3.org/2000/svg"
+        role="img"
+        preserveAspectRatio="xMidYMid slice"
+        focusable="false"
+      >
+        <rect width="100%" height="100%" fill="#868e96"></rect>
+        <text x="38%" y="53%" fill="#dee2e6">No Image</text>
+      </svg>
+      {% endif %}
+
+      <div class="card-body">
+        <h5 class="card-title">{{ book.title }}</h5>
+        <p class="card-text">{{ book.description }}</p>
+        <a
+          href="{{ url_for('site.book_details', book_id=book.id) }}"
+          class="btn border"
+          >View Details</a
+        >
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Add homepage content here -->
+<nav aria-label="Page navigation example">
+  <ul class="pagination justify-content-center">
+    <li class="page-item {{ 'disabled' if not pagination.has_prev }}">
+      <a
+        class="page-link"
+        href="/books?lan={{ lan }}&page={{ pagination.page - 1 }}"
+        >Previous</a
+      >
+    </li>
+    {% for i in range(1, pagination.total_pages + 1) %} {% if i >=
+    pagination.page - 1 and i <= pagination.page + 1 %}
+    <li class="page-item {{ 'active' if i == pagination.page }}">
+      <a class="page-link" href="/books?lan={{ lan }}&page={{ i }}">{{ i }}</a>
+    </li>
+    {% endif %} {% endfor %}
+    <li class="page-item {{ 'disabled' if not pagination.has_next }}">
+      <a
+        class="page-link"
+        href="/books?lan={{ lan }}&page={{ pagination.page + 1 }}"
+        >Next</a
+      >
+    </li>
+  </ul>
+</nav>
+
+<script src="{{ url_for('static', filename='js/book_listings.js') }}"></script>
+{% endblock %}

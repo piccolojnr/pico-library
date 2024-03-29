@@ -10,13 +10,13 @@ from .endpoints import (
     book_listings,
     bookmarks_management,
     bookshelves_management,
-    bookshelf,
     index,
     recommendations,
     user_profile,
     agent_details,
     internal_server_error,
     page_not_found,
+    bookshelf_listings,
 )
 
 
@@ -34,5 +34,5 @@ __all__ = [
     "recommendations",
     "user_profile",
     "agent_details",
-    "bookshelf",
+    "bookshelf_listings",
 ]

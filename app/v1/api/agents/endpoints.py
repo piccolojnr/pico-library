@@ -7,7 +7,6 @@ from app.v1.api.agents.business import (
     process_get_agent,
     process_delete_agent,
     process_update_agent,
-    process_get_agent_books,
     process_add_agent_book,
     process_remove_agent_book,
     process_get_popular_agents,
@@ -18,7 +17,7 @@ from app.v1.api.agents.dto import (
     create_agent_reqparse,
     pagination_links_model,
     agent_pagination_model,
-    agent_pagination_reqparse,
+    pagination_reqparse,
     short_agent_model,
 )
 
@@ -41,13 +40,14 @@ class AgentsResource(Resource):
         args = create_agent_reqparse.parse_args()
         return process_create_agent(args)
 
-    @agents_ns.expect(agent_pagination_reqparse)
+    @agents_ns.expect(pagination_reqparse)
     def get(self):
-        args = agent_pagination_reqparse.parse_args()
+        args = pagination_reqparse.parse_args()
         page = args["page"]
         per_page = args["per_page"]
         type = args["type"]
-        return process_get_agents(page=page, per_page=per_page, type=type)
+        q = args["q"]
+        return process_get_agents(page=page, per_page=per_page, type=type, q=q)
 
 
 @agents_ns.route("/<int:agent_id>", endpoint="agent")
@@ -85,19 +85,6 @@ class AgentResource(Resource):
         return process_update_agent(agent_id, args)
 
 
-@agents_ns.route("/<int:agent_id>/books", endpoint="agent_books")
-class AgentBooksResource(Resource):
-    @agents_ns.expect(agent_pagination_reqparse)
-    def get(self, agent_id):
-        """
-        Get agent's books.
-        """
-        args = agent_pagination_reqparse.parse_args()
-        page = args["page"]
-        per_page = args["per_page"]
-        return process_get_agent_books(agent_id, page, per_page)
-
-
 @agents_ns.route("/<int:agent_id>/books/<int:book_id>", endpoint="agent_book")
 class AgentBookResource(Resource):
     @require_token(scope={"is_admin": True})
@@ -125,12 +112,12 @@ class AgentBookResource(Resource):
 
 @agents_ns.route("/popular", endpoint="popular_agents")
 class PopularAgentsResource(Resource):
-    @agents_ns.expect(agent_pagination_reqparse)
+    @agents_ns.expect(pagination_reqparse)
     def get(self):
         """
         Get popular agents.
         """
-        args = agent_pagination_reqparse.parse_args()
+        args = pagination_reqparse.parse_args()
         page = args["page"]
         per_page = args["per_page"]
         return process_get_popular_agents(page, per_page)

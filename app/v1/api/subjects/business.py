@@ -33,29 +33,44 @@ def process_get_subject(subject_id):
         abort(HTTPStatus.NOT_FOUND, "Subject not found")
 
 
-def process_get_subjects(page=1, per_page=10):
-    subject = Subject.query.order_by(desc(Subject.score)).paginate(
-        page=page,
-        per_page=per_page,
-    )
+def process_get_subjects(page=1, per_page=10, q=None):
+    filter_conditions = []
+
+    if q:
+        filter_conditions.append(Subject.name.like(f"%{q}%"))
+
+    if filter_conditions:
+        subjects = (
+            Subject.query.order_by(desc(Subject.score))
+            .filter(*filter_conditions)
+            .paginate(
+                page=page,
+                per_page=per_page,
+            )
+        )
+    else:
+        subjects = Subject.query.order_by(desc(Subject.score)).paginate(
+            page=page,
+            per_page=per_page,
+        )
 
     pagination = dict(
-        page=subject.page,
-        items_per_page=subject.per_page,
-        total_pages=subject.pages,
-        total_items=subject.total,
-        items=subject.items,
-        has_next=subject.has_next,
-        has_prev=subject.has_prev,
-        next_num=subject.next_num,
-        prev_num=subject.prev_num,
+        page=subjects.page,
+        items_per_page=subjects.per_page,
+        total_pages=subjects.pages,
+        total_items=subjects.total,
+        items=subjects.items,
+        has_next=subjects.has_next,
+        has_prev=subjects.has_prev,
+        next_num=subjects.next_num,
+        prev_num=subjects.prev_num,
         links=[],
     )
     response_data = marshal(pagination, subject_pagination_model)
     response_data["links"] = _pagination_nav_links(pagination, "subjects")
     response = jsonify(response_data)
     response.headers["Link"] = _pagination_nav_header_links(pagination, "subjects")
-    response.headers["Total-Count"] = subject.pages
+    response.headers["Total-Count"] = subjects.pages
     return response
 
 
@@ -115,48 +130,6 @@ def process_delete_subject_book(subject_id, user_public_id):
         "status": "success",
         "message": "Book removed from subject successfully",
     }
-
-
-def process_get_subject_books(subject_id, page=1, per_page=10, lan="all"):
-    subject = Subject.query.filter(Subject.id == subject_id).first()
-    if not subject:
-        abort(HTTPStatus.NOT_FOUND, "Subject not found")
-    if lan == "all":
-        books = Book.query.filter(Book.subjects.any(Subject.id == subject.id)).paginate(
-            page=page,
-            per_page=per_page,
-        )
-    else:
-        books = Book.query.filter(
-            Book.languages.any(Language.id == lan),
-            Book.subjects.any(Subject.id == subject.id),
-        ).paginate(
-            page=page,
-            per_page=per_page,
-        )
-
-    pagination = dict(
-        page=books.page,
-        items_per_page=books.per_page,
-        total_pages=books.pages,
-        total_items=books.total,
-        items=books.items,
-        has_next=books.has_next,
-        has_prev=books.has_prev,
-        next_num=books.next_num,
-        prev_num=books.prev_num,
-        links=[],
-    )
-    response_data = marshal(pagination, book_pagination_model)
-    response_data["links"] = _pagination_nav_links(
-        pagination, "subject_books", subject_id=subject_id
-    )
-    response = jsonify(response_data)
-    response.headers["Link"] = _pagination_nav_header_links(
-        pagination, "subject_books", subject_id=subject_id
-    )
-    response.headers["Total-Count"] = books.pages
-    return response
 
 
 def process_create_subject_user(subject_id, user_public_id):

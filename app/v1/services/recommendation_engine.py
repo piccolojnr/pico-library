@@ -7,8 +7,8 @@ from app.v1.models import (
 from . import calculate_score, calculate_review_score, calculate_popularity_score
 
 
-def generate_recommendations(user: User, page=1, per_page=10, lan="all"):
-    if lan == "all":
+def generate_recommendations(user: User, page=1, per_page=10, lan=None):
+    if lan:
         unread_books = Book.query.filter(
             ~Book.bookmarks.any(Bookmark.user_id == user.id)
         ).all()

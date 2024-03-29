@@ -18,7 +18,6 @@ from .business import (
     process_delete_subject_book,
     process_delete_subject_user,
     process_get_subject,
-    process_get_subject_books,
     process_get_subjects,
     process_update_subject,
 )
@@ -40,7 +39,8 @@ class SubjectsResource(Resource):
         args = pagination_reqparse.parse_args()
         page = args["page"]
         per_page = args["per_page"]
-        return process_get_subjects(page, per_page)
+        q = args["q"]
+        return process_get_subjects(page, per_page, q)
 
     @require_token()
     @subjects_ns.doc(security="Bearer")
@@ -91,20 +91,6 @@ class SubjectResource(Resource):
         name = args["name"]
         score = args["score"]
         return process_update_subject(subject_id, name, score)
-
-
-@subjects_ns.route("/<subject_id>/books", endpoint="subject_books")
-class SubjectBooksResource(Resource):
-    @subjects_ns.expect(pagination_reqparse)
-    def get(self, subject_id):
-        """
-        Get subject's books.
-        """
-        args = pagination_reqparse.parse_args()
-        page = args["page"]
-        per_page = args["per_page"]
-        lan = args["lan"]
-        return process_get_subject_books(subject_id, page, per_page, lan)
 
 
 @subjects_ns.route("/<subject_id>/books/<book_id>", endpoint="subject_book")

@@ -101,7 +101,7 @@
       <div class="row align-items-start justify-content-center">
         {% for shelf in bookshelves['items'] %}
         <div class="bookshelve-card card">
-          <a href="/bookshelves/{{ shelf.id }}/books">
+          <a href="/books?bookshelf={{ shelf.id }}">
             <div class="card-body">{{ shelf.name }}</div>
           </a>
         </div>
@@ -116,7 +116,7 @@
       <div class="row align-items-start justify-content-center">
         {% for subject in subjects['items'] %}
         <div class="bookshelve-card card">
-          <a href="/subjects/{{ subject.id }}/books">
+          <a href="/books?subject={{ subject.id }}">
             <div class="card-body">{{ subject.name }}</div>
           </a>
         </div>

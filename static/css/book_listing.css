@@ -42,3 +42,45 @@
     width: 150px !important;
   }
 }
+
+.search-bar .height {
+  height: 100vh;
+}
+
+.search-bar .form {
+  position: relative;
+}
+
+.search-bar .form .fa-search {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  color: #9ca3af;
+}
+
+.search-bar .form span {
+  position: absolute;
+  right: 17px;
+  top: 13px;
+  padding: 2px;
+  border-left: 1px solid #d1d5db;
+}
+
+.search-bar .left-pan {
+  padding-left: 7px;
+}
+
+.search-bar .left-pan i {
+  padding-left: 10px;
+}
+
+.search-bar .form-input {
+  height: 55px;
+  text-indent: 33px;
+  border-radius: 10px;
+}
+
+.search-bar .form-input:focus {
+  box-shadow: none;
+  border: none;
+}

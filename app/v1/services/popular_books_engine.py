@@ -2,8 +2,8 @@ from . import calculate_score, calculate_review_score, calculate_popularity_scor
 from app.v1.models import Book, Language
 
 
-def generate_popular_books(page=1, per_page=10, lan="all"):
-    if lan == "all":
+def generate_popular_books(page=1, per_page=10, lan=None):
+    if lan == None:
         books = Book.query.filter(Book.downloads > 50).all()
     else:
         books = Book.query.filter(

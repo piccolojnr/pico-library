@@ -61,14 +61,21 @@ def process_delete_agent(agent_id):
     return {"status": "success", "message": "agent deleted successfully"}
 
 
-def process_get_agents(page=1, per_page=10, type=None):
-    if not type:
-        agents = Agent.query.paginate(page=page, per_page=per_page)
-    else:
+def process_get_agents(page=1, per_page=10, type=None, q=None):
+
+    filter_conditions = []
+    if q:
+        filter_conditions.append(Agent.name.ilike(f"%{q}%"))
+    if type and type != "all":
         agent_type = AgentType[type.upper()]
-        agents = Agent.query.filter_by(type=agent_type).paginate(
+        filter_conditions.append(Agent.type == agent_type)
+
+    if filter_conditions:
+        agents = Agent.query.filter(*filter_conditions).paginate(
             page=page, per_page=per_page, error_out=False
         )
+    else:
+        agents = Agent.query.paginate(page=page, per_page=per_page)
 
     pagination = dict(
         page=agents.page,
@@ -114,39 +121,6 @@ def process_get_popular_agents(page=1, per_page=10):
         pagination, "popular_agents"
     )
     response.headers["Total-Count"] = agents.pages
-    return response
-
-
-def process_get_agent_books(agent_id, page=1, per_page=10):
-    agent = Agent.query.filter(Agent.id == agent_id).first()
-    if not agent:
-        abort(HTTPStatus.NOT_FOUND, "Agent not found")
-
-    books = Book.query.filter(Book.agents.any(Agent.id == agent_id)).paginate(
-        page=page, per_page=per_page, error_out=False
-    )
-
-    pagination = dict(
-        page=books.page,
-        items_per_page=books.per_page,
-        total_pages=books.pages,
-        total_items=books.total,
-        items=books.items,
-        has_next=books.has_next,
-        has_prev=books.has_prev,
-        next_num=books.next_num,
-        prev_num=books.prev_num,
-        links=[],
-    )
-    response_data = marshal(pagination, book_pagination_model)
-    response_data["links"] = _pagination_nav_links(
-        pagination, "agent_books", agent_id=agent_id
-    )
-    response = jsonify(response_data)
-    response.headers["Link"] = _pagination_nav_header_links(
-        pagination, "agent_books", agent_id=agent_id
-    )
-    response.headers["Total-Count"] = books.pages
     return response
 
 

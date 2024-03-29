@@ -2,7 +2,6 @@ from flask_restx import Namespace, Resource
 from flask_pyjwt import require_token
 from flask import request
 from app.v1.api.books.business import (
-    process_search_books,
     process_get_recommedations,
     process_create_book,
     process_delete_book,
@@ -10,7 +9,6 @@ from app.v1.api.books.business import (
     process_get_books,
     process_update_book,
     process_get_popular_books,
-    process_get_book_by_title,
 )
 from http import HTTPStatus
 from app.v1.api.books.dto import (
@@ -56,7 +54,19 @@ class BooksResource(Resource):
         page = args.get("page")
         per_page = args.get("per_page")
         lan = args.get("lan")
-        return process_get_books(page, per_page, lan)
+        subject = args.get("subject")
+        agent = args.get("agent")
+        bookshelf = args.get("bookshelf")
+        q = args.get("q")
+        return process_get_books(
+            page=page,
+            per_page=per_page,
+            lan=lan,
+            subject=subject,
+            agent=agent,
+            bookshelf=bookshelf,
+            q=q,
+        )
 
 
 @books_ns.route("/<book_id>", endpoint="book")
@@ -126,21 +136,3 @@ class GetRecommendations(Resource):
         per_page = args.get("per_page")
         lan = args.get("lan")
         return process_get_popular_books(page, per_page, lan)
-
-
-@books_ns.route("/search", endpoint="book_search")
-class BookSearchResource(Resource):
-    @books_ns.expect(pagination_reqparse)
-    def get(self):
-        """
-        Search for books.
-        """
-        args = pagination_reqparse.parse_args()
-        query = args.get("q")
-        criteria = args.get("criteria")
-        page = args.get("page")
-        per_page = args.get("per_page")
-        lan = args.get("lan")
-        return process_search_books(
-            query=query, criteria=criteria, page=page, per_page=per_page, lan=lan
-        )

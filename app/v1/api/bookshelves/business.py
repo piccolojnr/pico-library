@@ -86,12 +86,22 @@ def process_delete_bookshelf(bookshelf_id):
     }
 
 
-def process_get_bookshelves(page=1, per_page=10):
-    bookshelves = (
-        Bookshelf.query.filter(Bookshelf.is_public == True)
-        .order_by(desc(Bookshelf.score))
-        .paginate(page=page, per_page=per_page)
-    )
+def process_get_bookshelves(page=1, per_page=10, q=None):
+    filter_conditions = []
+    if q:
+        filter_conditions.append(Bookshelf.name.ilike(f"%{q}%"))
+    if filter_conditions:
+        bookshelves = (
+            Bookshelf.query.filter(Bookshelf.is_public == True, *filter_conditions)
+            .order_by(desc(Bookshelf.score))
+            .paginate(page=page, per_page=per_page)
+        )
+    else:
+        bookshelves = (
+            Bookshelf.query.filter(Bookshelf.is_public == True)
+            .order_by(desc(Bookshelf.score))
+            .paginate(page=page, per_page=per_page)
+        )
     pagination = dict(
         page=bookshelves.page,
         items_per_page=bookshelves.per_page,
@@ -176,45 +186,3 @@ def process_delete_bookshelf_book_relationship(bookshelf_id, book_id):
     bookshelf.books.remove(book)
     db.session.commit()
     return {"status": "success", "message": "Book removed successfully"}
-
-
-def process_get_bookshelf_books(bookshelf_id, page=1, per_page=10):
-    bookshelf = Bookshelf.query.filter(Bookshelf.id == bookshelf_id).first()
-    if not bookshelf:
-        abort(HTTPStatus.NOT_FOUND, "Bookshelf not found")
-
-    if not bookshelf.is_public:
-        public_id = current_token.sub
-        user = User.find_by_public_id(public_id)
-        if not user:
-            abort(HTTPStatus.UNAUTHORIZED, "Unauthorized")
-
-    books = Book.query.filter(
-        Book.bookshelves.any(Bookshelf.id == bookshelf.id)
-    ).paginate(
-        page=page,
-        per_page=per_page,
-    )
-
-    pagination = dict(
-        page=books.page,
-        items_per_page=books.per_page,
-        total_pages=books.pages,
-        total_items=books.total,
-        items=books.items,
-        has_next=books.has_next,
-        has_prev=books.has_prev,
-        next_num=books.next_num,
-        prev_num=books.prev_num,
-        links=[],
-    )
-    response_data = marshal(pagination, book_pagination_model)
-    response_data["links"] = _pagination_nav_links(
-        pagination, "bookshelf_books", bookshelf_id=bookshelf_id
-    )
-    response = jsonify(response_data)
-    response.headers["Link"] = _pagination_nav_header_links(
-        pagination, "bookshelf_books", bookshelf_id=bookshelf_id
-    )
-    response.headers["Total-Count"] = books.pages
-    return response

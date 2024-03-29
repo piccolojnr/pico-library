@@ -56,11 +56,14 @@ pagination_reqparse.add_argument(
 )
 pagination_reqparse.add_argument("page", type=positive, default=1, required=False)
 pagination_reqparse.add_argument("per_page", type=positive, default=10, required=False)
+pagination_reqparse.add_argument("agent", type=str, default=None, required=False)
+pagination_reqparse.add_argument("subject", type=str, default=None, required=False)
+pagination_reqparse.add_argument("bookshelf", type=str, default=None, required=False)
 pagination_reqparse.add_argument(
     "lan",
     type=str,
     required=False,
-    default="all",
+    default=None,
 )
 
 pagination_links_model = Model(

@@ -4,18 +4,19 @@ from flask_restx.reqparse import RequestParser
 from flask_restx.inputs import positive
 
 
-agent_pagination_reqparse = RequestParser(bundle_errors=True)
-agent_pagination_reqparse.add_argument(
+pagination_reqparse = RequestParser(bundle_errors=True)
+pagination_reqparse.add_argument(
     "page", type=positive, required=False, default=1, help="Page number"
 )
-agent_pagination_reqparse.add_argument(
+pagination_reqparse.add_argument(
     "per_page",
     type=positive,
     required=False,
     default=10,
     help="Items per page",
 )
-agent_pagination_reqparse.add_argument(
+pagination_reqparse.add_argument("q", type=str, required=False, help="Search query")
+pagination_reqparse.add_argument(
     "type",
     type=str,
     choices=[

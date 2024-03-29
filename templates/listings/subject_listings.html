@@ -2,7 +2,32 @@
 {% extends 'layout.html' %} {% block title %}Subjects - Pico Library{% endblock
 %} {% block content %}
 <div class="container py-5">
-  <h1>Subjects</h1>
+  <!-- breadcrumbs -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      {% for crumb in breadcrumbs %}
+      <li
+        class="breadcrumb-item {{ crumb.active }}"
+        aria-current="{% if crumb.active == 'active' %}page{% endif %}"
+      >
+        {% if crumb.active == "active" %} {{crumb.name}} {% else %}
+        <a href="{{ crumb.url }}"> {{crumb.name}} </a>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </nav>
+  <!-- search input -->
+  <form class="d-flex mb-4" action="" id="search-bar">
+    <input
+      class="form-control from-control-sm mr-2"
+      type="search"
+      placeholder="Search"
+      aria-label="Search"
+    />
+    <button class="btn btn-outline-success" type="submit">Search</button>
+  </form>
+  <h1 class="mb-4">Subjects</h1>
   <div class="row row-cols-1 row-cols-md-3 g-4">
     {% for subject in pagination["items"] %}
     <div class="col">
@@ -10,7 +35,7 @@
         <div class="card-body">
           <h5 class="card-title">{{ subject.name }}</h5>
           <!-- You can add more details about the subject if available -->
-          <a href="/subjects/{{ subject.id }}/books" class="btn btn-primary"
+          <a href="/books?subject={{ subject.id }}" class="btn btn-primary"
             >View Books</a
           >
           <!-- Link to subject's books -->
@@ -41,4 +66,6 @@
     </li>
   </ul>
 </nav>
+<script src="{{ url_for('static', filename='js/subject_listings.js') }}"></script>
+
 {% endblock %}
