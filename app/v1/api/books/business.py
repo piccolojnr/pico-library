@@ -12,7 +12,6 @@ from app.v1.models import (
 from flask_restx import abort, marshal
 from http import HTTPStatus
 from app.v1.services.recommendation_engine import generate_recommendations
-from app.v1.services.popular_books_engine import generate_popular_books
 from flask import jsonify, url_for
 from app.v1.api.books.dto import book_pagination_model, book_model
 from app.v1 import db
@@ -145,7 +144,9 @@ def process_get_books(
     else:
         books = Book.query
 
-    books = books.paginate(page=page, per_page=per_page)
+    books = books.order_by(Book.popularity_score.desc()).paginate(
+        page=page, per_page=per_page
+    )
 
     pagination = dict(
         page=books.page,
@@ -211,25 +212,37 @@ def process_get_recommedations(page, per_page, lan):
 
 
 def process_get_popular_books(page=1, per_page=10, lan="en"):
-    recommendations, has_next, has_prev, total_pages = generate_popular_books(
-        page, per_page, lan
-    )
+    filter_conditions = []
+
+    if lan and lan != "all":
+        filter_conditions.append(Book.languages.any(Language.code == lan))
+
+    if filter_conditions:
+        books = (
+            Book.query.filter(*filter_conditions)
+            .order_by(Book.popularity_score.desc())
+            .paginate(page=page, per_page=per_page, error_out=False)
+        )
+    else:
+        books = Book.query.order_by(Book.popularity_score.desc()).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
 
     pagination = dict(
-        page=page,
-        items_per_page=per_page,
-        total_pages=total_pages,
-        total_items=len(recommendations),
-        items=recommendations,
-        has_next=has_next,
-        has_prev=has_prev,
-        next_num=page + 1 if has_next else None,
-        prev_num=page - 1 if has_prev else None,
+        page=books.page,
+        items_per_page=books.per_page,
+        total_pages=books.pages,
+        total_items=books.total,
+        items=books.items,
+        has_next=books.has_next,
+        has_prev=books.has_prev,
+        next_num=books.next_num,
+        prev_num=books.prev_num,
         links=[],
     )
     response_data = marshal(pagination, book_pagination_model)
     response_data["links"] = _pagination_nav_links(pagination, "popular_books")
     response = jsonify(response_data)
     response.headers["Link"] = _pagination_nav_header_links(pagination, "popular_books")
-    response.headers["Total-Count"] = total_pages
+    response.headers["Total-Count"] = books.total
     return response

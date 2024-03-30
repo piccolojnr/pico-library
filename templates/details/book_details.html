@@ -47,9 +47,7 @@ pico-library{% endblock %} {% block content %}
               {% for author in book_data.agents %}
               <li>
                 <div>
-                  <a href="{{ author.webpage }}" target="_blank"
-                    >{{ author.name }}</a
-                  >
+                  <a href="/agents/{{ author.id }}">{{ author.name }}</a>
                   <p><strong>type:</strong> {{ author.agent_type }}</p>
                 </div>
               </li>
@@ -78,7 +76,7 @@ pico-library{% endblock %} {% block content %}
             <ul>
               {% for subject in book_data.subjects %}
               <li>
-                <a href="/subjects/{{ subject.id }}">{{ subject.name }}</a>
+                <a href="/books?subject={{ subject.id }}">{{ subject.name }}</a>
               </li>
               {% endfor %}
             </ul>
@@ -89,7 +87,7 @@ pico-library{% endblock %} {% block content %}
             <ul>
               {% for bookshelf in book_data.bookshelves %}
               <li>
-                <a href="/bookshelves/{{ bookshelf.id }}"
+                <a href="/books?bookshelf={{ bookshelf.id }}"
                   >{{ bookshelf.name }}</a
                 >
               </li>

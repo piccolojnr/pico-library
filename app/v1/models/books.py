@@ -27,6 +27,7 @@ class Book(db.Model):
     description = db.Column(db.Text)
     downloads = db.Column(db.Integer, default=0)
     license = db.Column(db.String)
+    popularity_score = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=utc_now)
     updated_at = db.Column(db.DateTime, default=utc_now, onupdate=utc_now)
 

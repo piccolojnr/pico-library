@@ -7,12 +7,24 @@ from app.v1.config import get_config
 from flask_pyjwt import AuthManager, current_token
 from http import HTTPStatus
 from flask_restx import abort
+from apscheduler.schedulers.background import BackgroundScheduler
 
 cors = CORS()
 db = SQLAlchemy()
 migrate = Migrate()
 bcrypt = Bcrypt()
 auth_manager = AuthManager()
+
+from apscheduler.schedulers.background import BackgroundScheduler
+
+
+def start_scheduler():
+    scheduler = BackgroundScheduler()
+    # Schedule the function to run daily at a specific time (e.g., midnight)
+    from app.v1.services.popular_books_engine import preprocess_popularity_data
+
+    scheduler.add_job(preprocess_popularity_data, "interval", days=7)
+    scheduler.start()
 
 
 def create_app(config_name):
@@ -50,4 +62,5 @@ def create_app(config_name):
     def internal_server_error(error):
         return render_template("errors/500.html"), 500
 
+    start_scheduler()
     return app

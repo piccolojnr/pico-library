@@ -4,28 +4,33 @@ from app.v1.models import (
     Language,
     Bookmark,
 )
-from . import calculate_score, calculate_review_score, calculate_popularity_score
+from . import calculate_score
+from sqlalchemy import desc
 
 
 def generate_recommendations(user: User, page=1, per_page=10, lan=None):
     if lan:
-        unread_books = Book.query.filter(
-            ~Book.bookmarks.any(Bookmark.user_id == user.id)
-        ).all()
+        unread_books = (
+            Book.query.filter(~Book.bookmarks.any(Bookmark.user_id == user.id))
+            .order_by(desc(Book.popularity_score))
+            .limit(200)
+            .all()
+        )
     else:
-        unread_books = Book.query.filter(
-            ~Book.bookmarks.any(Bookmark.user_id == user.id),
-            Book.languages.any(Language.code == lan),
-        ).all()
+        unread_books = (
+            Book.query.filter(
+                ~Book.bookmarks.any(Bookmark.user_id == user.id),
+                Book.languages.any(Language.code == lan),
+            )
+            .order_by(desc(Book.popularity_score))
+            .limit(200)
+            .all()
+        )
 
     # Calculate scores for candidate books
     scores = {}
     for book in unread_books:
         score = calculate_score(user, book)
-        # Incorporate review score based on reviews and votes
-        score += calculate_review_score(book)
-        # Incorporate popularity score based on the number of reads
-        score += calculate_popularity_score(book)
         scores[book] = score
 
     # Rank candidate books based on scores
