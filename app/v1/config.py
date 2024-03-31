@@ -72,6 +72,7 @@ class DevelopmentConfig(Config):
     JWT_AUTHMAXAGE = 900
     JWT_REFRESHMAXAGE = 3600
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", POSTSQL_DEV)
+    SECRET_KEY = os.getenv("SECRET_KEY")
 
 
 class ProductionConfig(Config):
@@ -83,6 +84,7 @@ class ProductionConfig(Config):
     JWT_REFRESHMAXAGE = 604800
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", POSTSQL_PROD)
     PRESERVE_CONTEXT_ON_EXCEPTION = True
+    SECRET_KEY = os.getenv("SECRET_KEY")
 
 
 ENV_CONFIG_DICT = dict(

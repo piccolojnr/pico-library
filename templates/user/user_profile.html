@@ -1,2 +1,83 @@
 {% extends 'layout.html' %} {% block title %}profile - pico-library{% endblock
-%} {% block content %} Profile {% endblock %}
+%} {% block content %}
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">User Profile</div>
+        <div class="m-3">
+          <img
+            src="https://api.dicebear.com/8.x/bottts/svg?seed={{ profile_data.user.public_id }}"
+            alt="User Avatar"
+            width="200"
+            class="img-thumbnail rounded-circle"
+          />
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              value="{{ profile_data.user.email }}"
+              disabled
+            />
+          </div>
+          <div class="mb-3">
+            <label for="first_name" class="form-label">First Name:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="first_name"
+              value="{{ profile_data.first_name }}"
+              disabled
+            />
+          </div>
+          <div class="mb-3">
+            <label for="last_name" class="form-label">Last Name:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="last_name"
+              value="{{ profile_data.last_name or 'no info' }}"
+              disabled
+            />
+          </div>
+          <div class="mb-3">
+            <label for="location" class="form-label">Location:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="location"
+              value="{{ profile_data.location or 'no info' }}"
+              disabled
+            />
+          </div>
+          <div class="mb-3">
+            <label for="gender" class="form-label">Gender:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="gender"
+              value="{{ profile_data.gender }}"
+              disabled
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="bio" class="form-label">Bio:</label>
+            <textarea class="form-control" id="bio" rows="3" disabled>
+{{ profile_data.bio or 'no info' }}</textarea
+            >
+          </div>
+
+          <a href="#" class="btn btn-primary">Edit Profile</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

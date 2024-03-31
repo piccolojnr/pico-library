@@ -1,5 +1,6 @@
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, session
 from . import web_bp
+from .decorators import login_required, is_logged_in
 from flask import request, abort
 import requests
 
@@ -13,6 +14,20 @@ def get_resource(api_url):
         abort(404)
     else:
         abort(500)  # Handle API request errors gracefully
+
+
+def get_auth_resource(api_url):
+    base_url = request.url_root
+    response = requests.get(
+        base_url + api_url,
+        headers={"Authorization": "Bearer " + session["auth_token"]},
+    )
+    if response.status_code == 200:
+        return response.json()
+    elif response.status_code == 404:
+        abort(404)
+    else:
+        abort(500)
 
 
 def get_breadcrumb_data(resource_name, resource_id, url_name):
@@ -37,6 +52,7 @@ def index():
 
     return render_template(
         "homepage.html",
+        is_logged_in=is_logged_in(),
         popular_books=popular_books,
         popular_agents=popular_agents,
         bookshelves=bookshelves,
@@ -93,6 +109,7 @@ def book_listings():
 
     return render_template(
         "listings/book_listings.html",
+        is_logged_in=is_logged_in(),
         pagination=pagination,
         languages=languages,
         lan=lan,
@@ -132,6 +149,7 @@ def agent_listings():
 
     return render_template(
         "listings/agent_listings.html",
+        is_logged_in=is_logged_in(),
         pagination=pagination,
         agent_type=agent_type,
         breadcrumbs=breadcrumbs,
@@ -165,7 +183,10 @@ def subject_listings():
     pagination = get_resource(f"api/v1/subjects?page={page}&per_page=30{q}")
 
     return render_template(
-        "listings/subject_listings.html", pagination=pagination, breadcrumbs=breadcrumbs
+        "listings/subject_listings.html",
+        pagination=pagination,
+        breadcrumbs=breadcrumbs,
+        is_logged_in=is_logged_in(),
     )
 
 
@@ -198,6 +219,7 @@ def bookshelf_listings():
 
     return render_template(
         "listings/bookshelf_listings.html",
+        is_logged_in=is_logged_in(),
         pagination=pagination,
         breadcrumbs=breadcrumbs,
     )
@@ -211,7 +233,10 @@ def book_details(book_id):
 
     # Logic to fetch and display book details for the given book_id
     return render_template(
-        "details/book_details.html", book_id=book_id, book_data=book_data
+        "details/book_details.html",
+        book_id=book_id,
+        book_data=book_data,
+        is_logged_in=is_logged_in(),
     )
 
 
@@ -221,59 +246,147 @@ def agent_details(agent_id):
     agent_data = get_resource(f"api/v1/agents/{agent_id}")
 
     return render_template(
-        "details/agent_details.html", agent_data=agent_data, agent_id=agent_id
+        "details/agent_details.html",
+        agent_data=agent_data,
+        agent_id=agent_id,
+        is_logged_in=is_logged_in(),
     )
 
 
 # User Authentication
-@web_bp.route("/login")
+@web_bp.route("/login", endpoint="login", methods=["GET", "POST"])
 def login():
-    return render_template("authentication/login.html")
+    if request.method == "POST":
+        # Logic to handle login form submission
+        base_url = request.url_root
+
+        login_data = request.form
+        data = {}
+        for key, value in login_data.items():
+            data[key] = value
+
+        url = url_for("api.auth_login")
+        response = requests.post(base_url + url, data=data)
+        print(response.json())
+        session["auth_token"] = response.json()["auth"]["auth_token"]
+        session["refresh_token"] = response.json()["auth"]["refresh_token"]
+        if response.status_code == 200:
+            return redirect(url_for("site.index"))
+        else:
+            return render_template(
+                "authentication/login.html",
+                is_logged_in=is_logged_in(),
+                error=True,
+                message=response.json()["message"]
+                or response.json()["errors"]
+                or "Login failed. Please try again.",
+            )
+    # Logic to display the login form
+    return render_template(
+        "authentication/login.html",
+        error=False,
+        is_logged_in=is_logged_in(),
+    )
 
 
-@web_bp.route("/register")
+@web_bp.route("/register", endpoint="register", methods=["GET", "POST"])
 def register():
-    return render_template("authentication/registration.html")
+    if request.method == "POST":
+        # Logic to handle registration form submission
+        base_url = request.url_root
+
+        register_data = request.form
+        data = {}
+        for key, value in register_data.items():
+            data[key] = value
+
+        if data["password"] != data["confirm_password"]:
+            return render_template(
+                "authentication/registration.html",
+                is_logged_in=is_logged_in(),
+                error=True,
+                message="Passwords do not match.",
+            )
+
+        url = url_for("api.auth_register")
+        response = requests.post(base_url + url, data=data)
+        if response.status_code == 201:
+            return redirect(url_for("site.login"))
+        else:
+            return render_template(
+                "authentication/registration.html",
+                is_logged_in=is_logged_in(),
+                error=True,
+                message=response.json()["message"]
+                or response.json()["errors"]
+                or "Registration failed. Please try again.",
+            )
+    return render_template(
+        "authentication/registration.html",
+        error=False,
+        is_logged_in=is_logged_in(),
+    )
 
 
 # User Profile
-@web_bp.route("/profile/<username>")
-def user_profile(username):
+@web_bp.route("/profile")
+@login_required
+def user_profile():
     # Logic to fetch and display user profile for the given username
-    return render_template("user/user_profile.html", username=username)
+
+    url = url_for("api.user_profile")
+    profile_data = get_auth_resource(url)
+    return render_template(
+        "user/user_profile.html",
+        is_logged_in=True,
+        profile_data=profile_data,
+    )
 
 
 # Bookshelves Management
 @web_bp.route("admin/bookshelves")
 def bookshelves_management():
     # Logic to manage bookshelves
-    return render_template("admin/bookshelves_management.html")
+    return render_template(
+        "admin/bookshelves_management.html",
+        is_logged_in=is_logged_in(),
+    )
 
 
 # Bookmarks Management
 @web_bp.route("admin/bookmarks")
 def bookmarks_management():
     # Logic to manage bookmarks
-    return render_template("admin/bookmarks_management.html")
+    return render_template(
+        "admin/bookmarks_management.html",
+        is_logged_in=is_logged_in(),
+    )
 
 
 # Recommendations
 @web_bp.route("/recommendations")
 def recommendations():
     # Logic to provide book recommendations
-    return render_template("user/recommendations.html")
+    return render_template(
+        "user/recommendations.html",
+        is_logged_in=is_logged_in(),
+    )
 
 
 # Admin Panel
 @web_bp.route("/admin")
 def admin_panel():
     # Logic for admin panel (authentication required)
-    return render_template("admin/admin_panel.html")
+    return render_template(
+        "admin/admin_panel.html",
+    )
 
 
 @web_bp.route("/404")
 def page_not_found():
-    return render_template("errors/404.html")
+    return render_template(
+        "errors/404.html",
+    )
 
 
 @web_bp.route("/500")

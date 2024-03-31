@@ -116,4 +116,66 @@ pico-library{% endblock %} {% block content %}
   </div>
 </div>
 
+<ul class="nav nav-tabs">
+  <li class="nav-item">
+    <button id="nav-reviews-tab" class="nav-link active" aria-current="page">
+      Reviews
+    </button>
+  </li>
+  <li class="nav-item">
+    <button id="nav-comments-tab" class="nav-link">Comments</button>
+  </li>
+</ul>
+<script>
+  $("#nav-reviews-tab").bind("click", function () {
+    var current = $(this).attr("aria-current");
+    if (!current) {
+      $(this).attr("aria-current", "page");
+      $(this).addClass("active");
+
+      $("#nav-comments-tab").removeAttr("aria-current");
+      $("#nav-comments-tab").removeClass("active");
+
+      $("#reviews").addClass("active");
+      $("#reviews").addClass("show");
+
+      $("#comments").removeClass("active");
+      $("#comments").removeClass("show");
+    }
+  });
+  $("#nav-comments-tab").bind("click", function () {
+    var current = $(this).attr("aria-current");
+    if (!current) {
+      $(this).attr("aria-current", "page");
+      $(this).addClass("active");
+
+      $("#nav-reviews-tab").removeAttr("aria-current");
+      $("#nav-reviews-tab").removeClass("active");
+
+      $("#comments").addClass("active");
+      $("#comments").addClass("show");
+
+      $("#reviews").removeClass("active");
+      $("#reviews").removeClass("show");
+    }
+  });
+</script>
+
+<div class="tab-content mt-3">
+  <div class="tab-pane fade show active" id="reviews">
+    <!-- Display reviews -->
+    <div id="reviews-content">
+      <!-- Reviews will be dynamically loaded here -->
+      reviews
+    </div>
+  </div>
+  <div class="tab-pane fade" id="comments">
+    <!-- Display comments -->
+    <div id="comments-content">
+      <!-- Comments will be dynamically loaded here -->
+      comments
+    </div>
+  </div>
+</div>
+
 {% endblock %}
