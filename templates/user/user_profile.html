@@ -143,7 +143,21 @@
             <div
               class="container d-flex justify-content-between align-items-center"
             >
-              <button type="submit" class="btn btn-success">submit</button>
+              <button
+                type="submit"
+                class="btn btn-success"
+                {%
+                if
+                not
+                editable
+                %}
+                disabled
+                {%
+                endif
+                %}
+              >
+                submit
+              </button>
               <a
                 href="/profile?editable={% if editable %}False{% else %}True{% endif %}"
                 class="btn btn-{% if editable %}warning{% else %}primary{% endif %}"
@@ -153,8 +167,75 @@
             </div>
           </form>
         </div>
+        <div class="card-footer">
+          <!-- modal button -->
+          <button
+            type="button"
+            class="btn border"
+            data-bs-toggle="modal"
+            data-bs-target="#change-password-modal"
+          >
+            change password
+          </button>
+        </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- change password modal -->
+
+<!-- modal -->
+<div class="modal" tabindex="-1" id="change-password-modal">
+  <div class="modal-dialog">
+    <form class="modal-content" name="change-password">
+      <div class="modal-header">
+        <h5 class="modal-title">Modal title</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="old_password" class="form-label">Old Password:</label>
+          <input
+            type="password"
+            class="form-control"
+            name="old_password"
+            disabled
+          />
+        </div>
+        <div class="mb-3">
+          <label for="new_password" class="form-label">New Password:</label>
+          <input
+            type="password"
+            class="form-control"
+            name="new_password"
+            disabled
+          />
+        </div>
+        <div class="mb-3">
+          <label for="confirm_new_password" class="form-label"
+            >Confirm New Password:</label
+          >
+          <input
+            type="password"
+            class="form-control"
+            name="confirm_new_password"
+            disabled
+          />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+      </div>
+    </form>
   </div>
 </div>
 {% endblock %}
