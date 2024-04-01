@@ -3,6 +3,7 @@ from . import web_bp
 from .decorators import login_required, is_logged_in
 from flask import request, abort
 import requests
+from flask import session
 
 
 def get_resource(api_url):
@@ -16,17 +17,30 @@ def get_resource(api_url):
         abort(500)  # Handle API request errors gracefully
 
 
-def get_auth_resource(api_url):
+def get_auth_resource(api_url, **kwargs):
     base_url = request.url_root
+    accept = None
+    if "accept" in kwargs:
+        accept = kwargs["accept"]
+        del kwargs["accept"]
+    headers = {
+        "Authorization": "Bearer " + session["auth_token"],
+    }
+    if accept:
+        headers["Accept"] = accept
+
     response = requests.get(
         base_url + api_url,
-        headers={"Authorization": "Bearer " + session["auth_token"]},
+        headers=headers,
+        **kwargs,
     )
     if response.status_code == 200:
         return response.json()
     elif response.status_code == 404:
+        print(response.json())
         abort(404)
     else:
+        print(response.json())
         abort(500)
 
 
@@ -267,7 +281,6 @@ def login():
 
         url = url_for("api.auth_login")
         response = requests.post(base_url + url, data=data)
-        print(response.json())
         session["auth_token"] = response.json()["auth"]["auth_token"]
         session["refresh_token"] = response.json()["auth"]["refresh_token"]
         if response.status_code == 200:
@@ -328,18 +341,117 @@ def register():
     )
 
 
+@web_bp.route("/logout", endpoint="logout", methods=["GET"])
+@login_required
+def logout():
+    # Logic to handle logout
+    url = url_for("api.auth_logout")
+    base_url = request.url_root
+    headers = {
+        "Authorization": "Bearer " + session["auth_token"],
+    }
+    response = requests.post(base_url + url, headers=headers)
+    # print(response.json(), session["auth_token"])
+    if response.status_code == 200:
+        session.pop("auth_token", None)
+        session.pop("refresh_token", None)
+        return redirect(url_for("site.index"))
+    else:
+        return redirect(url_for("site.index"))
+
+
+@web_bp.route("/resend_confirmation", endpoint="resend_confirmation", methods=["GET"])
+@login_required
+def resend_confirmation():
+    # Logic to resend confirmation email
+    url = url_for("api.send_confirmation_email")
+    base_url = request.url_root
+    headers = {
+        "Authorization": "Bearer " + session["auth_token"],
+    }
+    response = requests.post(base_url + url, headers=headers)
+    return """
+<script>
+    this.window.close();
+</script>
+"""
+
+
+@web_bp.route(
+    "/confirm_email/<token>", endpoint="confirm_email", methods=["GET", "POST"]
+)
+def confirm_email(token):
+    # Logic to confirm email address
+    if request.method == "POST":
+        base_url = request.url_root
+
+        login_data = request.form
+        data = {}
+        for key, value in login_data.items():
+            data[key] = value
+
+        url = url_for("api.confirm_email", token=token)
+        response = requests.post(base_url + url, data=data)
+        if response.status_code == 200:
+            return redirect(url_for("site.index"))
+        else:
+            print(response.json())
+            return render_template(
+                "authentication/confirm_email.html",
+                error=True,
+                message=response.json()["message"]
+                or response.json()["errors"]
+                or "Email confirmation failed. Please try again.",
+            )
+    # Logic to display the confirmation form
+    return render_template("authentication/confirm_email.html")
+
+
 # User Profile
-@web_bp.route("/profile")
+@web_bp.route("/profile", endpoint="profile", methods=["GET", "POST"])
 @login_required
 def user_profile():
     # Logic to fetch and display user profile for the given username
+    if request.method == "POST":
+        # Logic to handle profile form submission
+        base_url = request.url_root
 
+        profile_data = request.form
+        data = {}
+        for key, value in profile_data.items():
+            data[key] = value
+        print(data)
+        url = url_for("api.user_profile")
+        headers = {
+            "Authorization": "Bearer " + session["auth_token"],
+            "Accept": "application/json",
+        }
+        response = requests.put(base_url + url, headers=headers, json=data)
+        if response.status_code == 200:
+            return redirect(url_for("site.profile"))
+        else:
+            editable = request.args.get("editable", "False", type=str)
+            url = url_for("api.user_profile")
+            profile_data = get_auth_resource(url)
+            return render_template(
+                "user/user_profile.html",
+                is_logged_in=True,
+                profile_data=profile_data,
+                editable=True,
+                error=True,
+                message=response.json()["message"]
+                or response.json()["errors"]
+                or "Profile update failed. Please try again.",
+            )
+
+    editable = request.args.get("editable", "False", type=str)
     url = url_for("api.user_profile")
     profile_data = get_auth_resource(url)
     return render_template(
         "user/user_profile.html",
         is_logged_in=True,
         profile_data=profile_data,
+        editable=eval(editable),
     )
 
 

@@ -1,7 +1,15 @@
 from flask_restx import Model
 from flask_restx.fields import String, Nested, Boolean
 
-user_model = Model("User", {"email": String, "is_admin": Boolean, "public_id": String})
+user_model = Model(
+    "User",
+    {
+        "email": String,
+        "is_admin": Boolean,
+        "is_email_confirmed": Boolean,
+        "public_id": String,
+    },
+)
 
 
 profile_model = Model(

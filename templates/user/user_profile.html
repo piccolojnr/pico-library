@@ -1,11 +1,28 @@
 {% extends 'layout.html' %} {% block title %}profile - pico-library{% endblock
 %} {% block content %}
-
 <div class="container mt-5">
   <div class="row justify-content-center">
     <div class="col-md-8">
       <div class="card">
         <div class="card-header">User Profile</div>
+        {% if not profile_data.user.is_email_confirmed %}
+        <div
+          class="mb-4 bg-info-subtle p-4"
+          style="
+            width: 100%;
+            text-align: center;
+            font-size: large;
+            font-weight: 500;
+          "
+        >
+          <p>
+            Please confirm your email. doing so will allow you to recover
+            forgotten passwords. click here to resend confirmation
+            <a href="/resend_confirmation" target="_blank">link</a>
+          </p>
+        </div>
+        {% endif %}
+
         <div class="m-3">
           <img
             src="https://api.dicebear.com/8.x/bottts/svg?seed={{ profile_data.user.public_id }}"
@@ -15,69 +32,129 @@
           />
         </div>
         <div class="card-body">
-          <div class="mb-3">
-            <label for="email" class="form-label">Email:</label>
-            <input
-              type="email"
-              class="form-control"
-              id="email"
-              value="{{ profile_data.user.email }}"
-              disabled
-            />
-          </div>
-          <div class="mb-3">
-            <label for="first_name" class="form-label">First Name:</label>
-            <input
-              type="text"
-              class="form-control"
-              id="first_name"
-              value="{{ profile_data.first_name }}"
-              disabled
-            />
-          </div>
-          <div class="mb-3">
-            <label for="last_name" class="form-label">Last Name:</label>
-            <input
-              type="text"
-              class="form-control"
-              id="last_name"
-              value="{{ profile_data.last_name or 'no info' }}"
-              disabled
-            />
-          </div>
-          <div class="mb-3">
-            <label for="location" class="form-label">Location:</label>
-            <input
-              type="text"
-              class="form-control"
-              id="location"
-              value="{{ profile_data.location or 'no info' }}"
-              disabled
-            />
-          </div>
-          <div class="mb-3">
-            <label for="gender" class="form-label">Gender:</label>
-            <input
-              type="text"
-              class="form-control"
-              id="gender"
-              value="{{ profile_data.gender }}"
-              disabled
-            />
-          </div>
+          <form method="post">
+            <div class="mb-3">
+              <label for="email" class="form-label">Email:</label>
+              <input
+                type="email"
+                class="form-control"
+                name="email"
+                value="{{ profile_data.user.email }}"
+                disabled
+              />
+            </div>
+            <div class="mb-3">
+              <label for="first_name" class="form-label">First Name:</label>
+              <input
+                type="text"
+                class="form-control"
+                name="first_name"
+                value="{{ profile_data.first_name }}"
+                {%
+                if
+                not
+                editable
+                %}
+                disabled
+                {%
+                endif
+                %}
+              />
+            </div>
+            <div class="mb-3">
+              <label for="last_name" class="form-label">Last Name:</label>
+              <input
+                type="text"
+                class="form-control"
+                name="last_name"
+                value="{{ profile_data.last_name or '' }}"
+                {%
+                if
+                not
+                editable
+                %}
+                disabled
+                {%
+                endif
+                %}
+              />
+            </div>
+            <div class="mb-3">
+              <label for="location" class="form-label">Location:</label>
+              <input
+                type="text"
+                class="form-control"
+                name="location"
+                value="{{ profile_data.location or '' }}"
+                {%
+                if
+                not
+                editable
+                %}
+                disabled
+                {%
+                endif
+                %}
+              />
+            </div>
+            <div class="mb-3">
+              <label for="gender" class="form-label">Gender:</label>
+              <select
+                class="form-control"
+                name="gender"
+                {%
+                if
+                not
+                editable
+                %}
+                disabled
+                {%
+                endif
+                %}
+                value="{{ profile_data.gender }}"
+              >
+                <option value="male">male</option>
+                <option value="female">female</option>
+              </select>
+            </div>
 
-          <div class="mb-3">
-            <label for="bio" class="form-label">Bio:</label>
-            <textarea class="form-control" id="bio" rows="3" disabled>
-{{ profile_data.bio or 'no info' }}</textarea
+            <div class="mb-3">
+              <label for="bio" class="form-label">Bio:</label>
+              <textarea
+                class="form-control"
+                name="bio"
+                rows="3"
+                {%
+                if
+                not
+                editable
+                %}
+                disabled
+                {%
+                endif
+                %}
+              >
+{{ profile_data.bio or '' }}</textarea
+              >
+            </div>
+            <div>
+              <p class="text-danger-emphasis">{{message}}</p>
+            </div>
+            <div
+              class="container d-flex justify-content-between align-items-center"
             >
-          </div>
-
-          <a href="#" class="btn btn-primary">Edit Profile</a>
+              <button type="submit" class="btn btn-success">submit</button>
+              <a
+                href="/profile?editable={% if editable %}False{% else %}True{% endif %}"
+                class="btn btn-{% if editable %}warning{% else %}primary{% endif %}"
+              >
+                {% if editable %} Cancel {% else %} Edit Profile {% endif %}
+              </a>
+            </div>
+          </form>
         </div>
       </div>
     </div>
   </div>
 </div>
-
 {% endblock %}

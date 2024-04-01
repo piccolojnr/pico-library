@@ -5,6 +5,8 @@ from app.v1.api.auth.business import (
     process_refresh_token_request,
     process_logout_request,
     process_change_password,
+    process_confirm_email,
+    _send_confirmation_email,
 )
 from flask_pyjwt import require_token, current_token
 from http import HTTPStatus
@@ -70,10 +72,7 @@ class RefreshToken(Resource):
     @auth_ns.doc(description="Refresh a token")
     @auth_ns.doc(security="Bearer")
     def post(self):
-        if current_token:
-            return process_refresh_token_request(current_token)
-        else:
-            return {"message": "Invalid token"}, 401
+        return process_refresh_token_request()
 
 
 @auth_ns.route("/logout", endpoint="auth_logout")
@@ -88,10 +87,7 @@ class LogoutUser(Resource):
     @auth_ns.doc(description="Logout a user")
     @auth_ns.doc(security="Bearer")
     def post(self):
-        if current_token:
-            return process_logout_request(current_token)
-        else:
-            return {"message": "Invalid token"}, 401
+        return process_logout_request()
 
 
 @auth_ns.route("/change_password", endpoint="auth_change_password")
@@ -125,3 +121,31 @@ class ProtectedRoute(Resource):
     @require_token(scope={"is_admin": True})
     def get(self):
         return {"message": "You've reached the admin protected route!"}, 200
+
+
+@auth_ns.route("/confirm_email/<token>", endpoint="confirm_email")
+class ConfirmEmail(Resource):
+    @auth_ns.expect(auth_login_reqparser)
+    def post(self, token):
+        request_data = auth_login_reqparser.parse_args()
+        email = request_data["email"]
+        password = request_data["password"]
+        return process_confirm_email(token, email, password)
+
+
+@auth_ns.route("/send_confirmation_email", endpoint="send_confirmation_email")
+class SendConfirmationEmail(Resource):
+    @require_token()
+    def post(self):
+        from app.v1.models import User
+        from flask_restx import abort
+        from flask import jsonify
+
+        public_id = current_token.sub
+
+        user = User.find_by_public_id(public_id)
+        if user is None:
+            abort(404, "User not found")
+        else:
+            _send_confirmation_email(user.email, user.public_id)
+            return jsonify({"message": "Email sent successfully"})

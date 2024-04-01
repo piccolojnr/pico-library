@@ -28,6 +28,7 @@ class User(db.Model):
     password_hash = db.Column(db.String)
     created_at = db.Column(db.DateTime, default=utc_now, nullable=False)
     last_logged_in = db.Column(db.DateTime, default=utc_now)
+    is_email_confirmed = db.Column(db.Boolean, default=False)
 
     profile = db.relationship("Profile", uselist=False, back_populates="user")
     bookmarks = db.relationship("Bookmark", back_populates="user")

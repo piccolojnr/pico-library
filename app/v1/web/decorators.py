@@ -13,7 +13,7 @@ def login_required(func):
     def wrapper(*args, **kwargs):
         if is_logged_in():
             return func(*args, **kwargs)
-        return redirect(url_for("login"))
+        return redirect(url_for("site.login"))
 
     return wrapper
 
@@ -37,5 +37,4 @@ def is_logged_in():
                     session["auth_token"] = response.json()["auth_token"]
                     return True
 
-        return True
     return False

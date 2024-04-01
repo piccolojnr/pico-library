@@ -8,14 +8,14 @@ from flask_pyjwt import AuthManager, current_token
 from http import HTTPStatus
 from flask_restx import abort
 from apscheduler.schedulers.background import BackgroundScheduler
+from flask_mail import Mail, Message
 
 cors = CORS()
 db = SQLAlchemy()
 migrate = Migrate()
 bcrypt = Bcrypt()
 auth_manager = AuthManager()
-
-from apscheduler.schedulers.background import BackgroundScheduler
+mail = Mail()
 
 
 def start_scheduler():
@@ -51,6 +51,7 @@ def create_app(config_name):
     migrate.init_app(app)
     bcrypt.init_app(app)
     auth_manager.init_app(app)
+    mail.init_app(app)
 
     # Error Pages
     @app.errorhandler(404)
