@@ -36,7 +36,7 @@ def process_registeration_reguest(email, password, first_name, last_name, gender
     response.status_code = HTTPStatus.CREATED
     response.headers["Cache-Control"] = "no-store"
     response.headers["Pragma"] = "no-cache"
-    _send_confirmation_email(new_user.email, new_user.public_id)
+    process_send_confirmation_email(new_user.email, new_user.public_id)
     return response
 
 
@@ -91,15 +91,25 @@ def process_refresh_token_request():
     return jsonify(message="token refreshed", auth_token=auth_token)
 
 
-def process_change_password(old_password, new_password):
-    user: User = User.find_by_public_id(current_token.sub)
-    if user and user.check_password(old_password):
-        user.password = new_password
-        db.session.commit()
-        return jsonify(message="Password changed successfully")
+def process_change_password(old_password, new_password, token=None):
+    if token:
+        payload = jwt.decode(
+            token, current_app.config["SECRET_KEY"], algorithms="HS256"
+        )
+        email = payload["email"]
+        user: User = User.find_by_email(email)
     else:
+        user: User = User.find_by_public_id(current_token.sub)
+
+    if not user:
+        abort(HTTPStatus.UNAUTHORIZED, "User not found")
+
+    if not token and not user.check_password(old_password):
         abort(HTTPStatus.UNAUTHORIZED, "Invalid credentials")
-        return None
+
+    user.password = new_password
+    db.session.commit()
+    return jsonify(message="Password changed successfully")
 
 
 def process_confirm_email(token, email, password):
@@ -136,18 +146,32 @@ def _get_token_expire_time():
     return expires_in_seconds
 
 
-def _send_confirmation_email(email, public_id):
+def process_send_forgot_password_email(email, public_id):
     try:
         token = _generate_confirmation_token(email, public_id)
-        confirm_url = url_for("site.confirm_email", token=token, _external=True)
-        msg = Message("Confirm Your Email Address", recipients=[email])
-        msg.html = f"<p>Please confirm your email address by clicking on the following link: <a href='{confirm_url}'>Confirm Email</a></p>"
-        msg.body = f"Please confirm your email address by clicking on the following link: {confirm_url}"
-        msg.subject = "Confirm Your Email Address"
-        msg.sender = "noreply@example.com"  # Replace with your email address
+        update_password_url = url_for(
+            "site.forgot_password", token=token, _external=True
+        )
+        msg = Message("Forgot Password", recipients=[email])
+        msg.body = f"Hello!\n\nWe received a request to reset your password. If this was you, please click on the following link to reset your password:\n\n{update_password_url}\n\nIf you didn't request a password reset, you can safely ignore this email.\n\nBest regards,\nThe Pico-Library Team"
+        msg.sender = current_app.config["MAIL_USERNAME"]
         mail.send(msg)
     except Exception as e:
         print(e)
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, "Failed to send email")
+
+
+def process_send_confirmation_email(email, public_id):
+    try:
+        token = _generate_confirmation_token(email, public_id)
+        confirm_email_url = url_for("site.confirm_email", token=token, _external=True)
+        msg = Message("Confirm Your Email Address", recipients=[email])
+        msg.body = f"Hello!\n\nThank you for registering with us. Please click on the following link to confirm your email address:\n\n{confirm_email_url}\n\nIf you didn't sign up for an account, you can safely ignore this email.\n\nBest regards,\nThe Pico-Library Team"
+        msg.sender = current_app.config["MAIL_USERNAME"]
+        mail.send(msg)
+    except Exception as e:
+        print(e)
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, "Failed to send email")
 
 
 def _generate_confirmation_token(email, public_id):

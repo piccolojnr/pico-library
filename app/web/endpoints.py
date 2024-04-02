@@ -270,6 +270,9 @@ def agent_details(agent_id):
 # User Authentication
 @web_bp.route("/login", endpoint="login", methods=["GET", "POST"])
 def login():
+    forgot_password = request.args.get("forgot_password", "False", type=str)
+    forgot_password = eval(forgot_password)
+
     if request.method == "POST":
         # Logic to handle login form submission
         base_url = request.url_root
@@ -278,6 +281,24 @@ def login():
         data = {}
         for key, value in login_data.items():
             data[key] = value
+
+        if forgot_password:
+            url = url_for("api.auth_forgot_password")
+            print(data)
+            response = requests.post(base_url + url, data=data)
+            print(response.json())
+            if response.status_code == 200:
+                return redirect(url_for("site.login"))
+            else:
+                return render_template(
+                    "authentication/login.html",
+                    error=False,
+                    is_logged_in=is_logged_in(),
+                    forgot_password=forgot_password,
+                    message=response.json()["message"]
+                    or response.json()["errors"]
+                    or "Forgot password failed. Please try again.",
+                )
 
         url = url_for("api.auth_login")
         response = requests.post(base_url + url, data=data)
@@ -295,10 +316,12 @@ def login():
                 or "Login failed. Please try again.",
             )
     # Logic to display the login form
+
     return render_template(
         "authentication/login.html",
         error=False,
         is_logged_in=is_logged_in(),
+        forgot_password=forgot_password,
     )
 
 
@@ -336,6 +359,50 @@ def register():
             )
     return render_template(
         "authentication/registration.html",
+        error=False,
+        is_logged_in=is_logged_in(),
+    )
+
+
+@web_bp.route(
+    "/login/forgot-password", endpoint="forgot_password", methods=["GET", "POST"]
+)
+def forgot_password():
+    token = request.args.get("token", None, type=str)
+    if not token:
+        return redirect(url_for("site.index"))
+    if request.method == "POST":
+        # Logic to handle forgot password form submission
+        base_url = request.url_root
+
+        forgot_password_data = request.form
+        data = {}
+        for key, value in forgot_password_data.items():
+            data[key] = value
+
+        if data["new_password"] != data["confirm_new_password"]:
+            return render_template(
+                "user/forgot_password.html",
+                error=True,
+                message="Passwords do not match",
+            )
+        data["token"] = token
+        url = url_for("api.auth_change_password")
+        response = requests.put(base_url + url, data=data)
+        print(response.json())
+        if response.status_code == 200:
+            return redirect(url_for("site.login"))
+        else:
+            return render_template(
+                "authentication/forgot_password.html",
+                is_logged_in=is_logged_in(),
+                error=True,
+                message=response.json()["message"]
+                or response.json()["errors"]
+                or "Forgot password failed. Please try again.",
+            )
+    return render_template(
+        "authentication/forgot_password.html",
         error=False,
         is_logged_in=is_logged_in(),
     )
@@ -413,14 +480,15 @@ def confirm_email(token):
 def user_profile():
     # Logic to fetch and display user profile for the given username
     if request.method == "POST":
+
         # Logic to handle profile form submission
         base_url = request.url_root
 
         profile_data = request.form
+
         data = {}
         for key, value in profile_data.items():
             data[key] = value
-        print(data)
         url = url_for("api.user_profile")
         headers = {
             "Authorization": "Bearer " + session["auth_token"],
@@ -430,7 +498,6 @@ def user_profile():
         if response.status_code == 200:
             return redirect(url_for("site.profile"))
         else:
-            editable = request.args.get("editable", "False", type=str)
             url = url_for("api.user_profile")
             profile_data = get_auth_resource(url)
             return render_template(
@@ -443,7 +510,6 @@ def user_profile():
                 or response.json()["errors"]
                 or "Profile update failed. Please try again.",
             )
-
     editable = request.args.get("editable", "False", type=str)
     url = url_for("api.user_profile")
     profile_data = get_auth_resource(url)
@@ -452,6 +518,58 @@ def user_profile():
         is_logged_in=True,
         profile_data=profile_data,
         editable=eval(editable),
+    )
+
+
+@web_bp.route("/profile/password", endpoint="password", methods=["GET", "POST"])
+def update_password():
+    if request.method == "POST":
+        # Logic to handle profile form submission
+        base_url = request.url_root
+
+        profile_data = request.form
+
+        data = {}
+        for key, value in profile_data.items():
+            data[key] = value
+
+        if data["new_password"] != data["confirm_new_password"]:
+            url = url_for("api.user_profile")
+            profile_data = get_auth_resource(url)
+            return render_template(
+                "user/change_password.html",
+                is_logged_in=True,
+                profile_data=profile_data,
+                editable=True,
+                error=True,
+                message="Passwords do not match",
+            )
+
+        url = url_for("api.auth_change_password")
+        headers = {
+            "Authorization": "Bearer " + session["auth_token"],
+        }
+        response = requests.put(base_url + url, headers=headers, data=data)
+        if response.status_code == 200:
+            return redirect(url_for("site.profile"))
+        else:
+            url = url_for("api.user_profile")
+            profile_data = get_auth_resource(url)
+            return render_template(
+                "user/change_password.html",
+                is_logged_in=True,
+                profile_data=profile_data,
+                message=response.json()["message"]
+                or response.json()["errors"]
+                or "Password update failed. Please try again.",
+            )
+
+    url = url_for("api.user_profile")
+    profile_data = get_auth_resource(url)
+    return render_template(
+        "user/change_password.html",
+        is_logged_in=True,
+        profile_data=profile_data,
     )
 
 

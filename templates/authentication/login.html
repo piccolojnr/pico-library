@@ -3,7 +3,7 @@
 
 <div class="container">
   <form class="p-4 border rounded" method="post">
-    <h2 class="mb-4">Login</h2>
+    <h2 class="mb-4">{{ 'Forgot password' if forgot_password else 'Login'}}</h2>
     <div class="mb-3">
       <label for="register-email" class="form-label">Email address</label>
       <input
@@ -14,7 +14,7 @@
         required
       />
     </div>
-
+    {% if not forgot_password %}
     <div class="mb-3">
       <label for="register-password" class="form-label">Password</label>
       <input
@@ -25,13 +25,30 @@
         required
       />
     </div>
+    <div
+      class="d-flex flex-row-reverse justify-content-between align-items-center"
+    >
+      <a href="/login?forgot_password=True">forgot password</a>
+    </div>
+    {% endif %}
     <div>
       <p class="text-danger-emphasis">{{message}}</p>
+      {% if forgot_password %}
+      <p>after submiting check your email for the link to update password</p>
+      {% endif %}
     </div>
     <div class="d-flex justify-content-between align-items-center">
-      <button type="submit" class="btn btn-primary">Login</button>
-      <p>Dont have an account <a href="/register">register</a></p>
+      <button type="submit" class="btn btn-primary" style="width: 100%">
+        {{ 'Submit' if forgot_password else 'Login' }}
+      </button>
     </div>
+    {% if not forgot_password %}
+    <div class="d-flex justify-content-between align-items-center">
+      <p class="opacity-50 fs-6 fw-lighter">
+        Dont have an account <a href="/register">register</a>
+      </p>
+    </div>
+    {% endif %}
   </form>
 </div>
 

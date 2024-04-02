@@ -1,4 +1,4 @@
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, abort
 from app.api.v1.auth.business import (
     process_login_request,
     process_registeration_reguest,
@@ -6,7 +6,8 @@ from app.api.v1.auth.business import (
     process_logout_request,
     process_change_password,
     process_confirm_email,
-    _send_confirmation_email,
+    process_send_confirmation_email,
+    process_send_forgot_password_email,
 )
 from flask_pyjwt import require_token, current_token
 from http import HTTPStatus
@@ -14,6 +15,7 @@ from app.api.v1.auth.dto import (
     auth_register_reqparser,
     auth_login_reqparser,
     auth_change_password_reqparser,
+    auth_send_forgot_password_reqparser,
 )
 
 auth_ns = Namespace(name="auth", validate=True)
@@ -90,9 +92,27 @@ class LogoutUser(Resource):
         return process_logout_request()
 
 
+@auth_ns.route("/forgot_password", endpoint="auth_forgot_password")
+class ForgotPassword(Resource):
+    @auth_ns.expect(auth_send_forgot_password_reqparser)
+    @auth_ns.response(HTTPStatus.OK, "Email sent successfully")
+    @auth_ns.response(HTTPStatus.BAD_REQUEST, "Bad request")
+    @auth_ns.response(HTTPStatus.INTERNAL_SERVER_ERROR, "Internal server error")
+    @auth_ns.doc(description="Send a forgot password email")
+    def post(self):
+        request_data = auth_send_forgot_password_reqparser.parse_args()
+        email = request_data["email"]
+        from app.models import User
+
+        user = User.query.filter_by(email=email).first()
+        if user is None:
+            return {"message": "User not found"}, HTTPStatus.NOT_FOUND
+
+        return process_send_forgot_password_email(email, user.public_id)
+
+
 @auth_ns.route("/change_password", endpoint="auth_change_password")
 class ChangePassword(Resource):
-    @require_token()
     @auth_ns.expect(auth_change_password_reqparser)
     @auth_ns.response(HTTPStatus.OK, "Password changed successfully")
     @auth_ns.response(HTTPStatus.BAD_REQUEST, "Bad request")
@@ -102,11 +122,12 @@ class ChangePassword(Resource):
     @auth_ns.response(HTTPStatus.NOT_FOUND, "Not found")
     @auth_ns.doc(description="Change a user's password")
     @auth_ns.doc(security="Bearer")
-    def post(self):
+    def put(self):
         request_data = auth_change_password_reqparser.parse_args()
         old_password = request_data["old_password"]
         new_password = request_data["new_password"]
-        return process_change_password(old_password, new_password)
+        token = request_data["token"]
+        return process_change_password(old_password, new_password, token)
 
 
 @auth_ns.route("/protected_route", endpoint="protected_route")
@@ -138,7 +159,7 @@ class SendConfirmationEmail(Resource):
     @require_token()
     def post(self):
         from app.models import User
-        from flask_restx import abort
+
         from flask import jsonify
 
         public_id = current_token.sub
@@ -147,5 +168,5 @@ class SendConfirmationEmail(Resource):
         if user is None:
             abort(404, "User not found")
         else:
-            _send_confirmation_email(user.email, user.public_id)
+            process_send_confirmation_email(user.email, user.public_id)
             return jsonify({"message": "Email sent successfully"})

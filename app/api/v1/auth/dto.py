@@ -61,14 +61,27 @@ auth_change_password_reqparser = RequestParser(bundle_errors=True)
 auth_change_password_reqparser.add_argument(
     "old_password",
     type=str,
-    required=True,
+    required=False,
     location="form",
-    help="Old password required",
+)
+auth_change_password_reqparser.add_argument(
+    "token",
+    type=str,
+    required=False,
+    location="form",
 )
 auth_change_password_reqparser.add_argument(
     "new_password",
     type=str,
-    required=True,
+    required=False,
     location="form",
     help="New password required",
+)
+auth_send_forgot_password_reqparser = RequestParser(bundle_errors=True)
+auth_send_forgot_password_reqparser.add_argument(
+    "email",
+    type=email(),
+    required=True,
+    location="form",
+    help="Email required",
 )
