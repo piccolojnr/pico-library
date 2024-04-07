@@ -1,4 +1,13 @@
 $(document).ready(function () {
+
+  for (const li of $("#book-info-list").children()) {
+    $(li).find(".li-info-toggle").on("click", function () {
+      $(li).toggleClass("closed");
+      $(li).toggleClass("opened");
+    })
+
+  }
+
   // Event Handlers
   $("#nav-reviews-tab").on("click", handleReviewsTabClick);
   $("#nav-comments-tab").on("click", handleCommentsTabClick);
@@ -98,11 +107,21 @@ function createComment(content, parent_id, type = "comment", ele = null, rating 
     },
     method: 'POST',
     data: JSON.stringify(data),
-    success: function () {
-      if (ele)
-        getComments(parent_id, type, ele);
-      else
-        getComments(null, type);
+    success: function (data) {
+      let item = null;
+      if (type === "review") {
+        item = constructReview(data.item);
+        if (ele === null) {
+          ele = $("#reviews-list");
+        }
+      }
+      else {
+        item = constructComment(data.item);
+        if (ele === null) {
+          ele = $("#comments-list");
+        }
+      }
+      ele.prepend(item);
     },
     error: function (err) {
       console.log(err.responseJSON);
@@ -199,6 +218,28 @@ function displayComments(input, el, type = "comment") {
   }
 }
 
+function handleReply(content, parent_id, el) {
+  createComment(content, parent_id, "reply", el);
+}
+
+
+function deleteComment(comment_id, el) {
+  $.ajax({
+    url: "/api/v1/comments/" + comment_id,
+    method: 'DELETE',
+    headers: {
+      'Authorization': 'Bearer ' + auth_token,
+      'Content-Type': 'application/json'
+    },
+    success: function (data) {
+      $("#comment-list-error-message").empty();
+      el.remove();
+    },
+    error: function (err) {
+      console.log(err.responseJSON);
+    }
+  });
+}
 
 
 // Function to construct review HTML
@@ -206,6 +247,8 @@ function constructReview(review) {
   // Construct review HTML
   let reviewItem = $("<div>").addClass("reviewItem");
   let top = $("<div>").addClass("top");
+  let bottom = $("<div>").addClass("bottom");
+
   let clientImage = $("<div>").addClass("clientImage");
   let avatarImg = $("<img>").attr("src", `https://api.dicebear.com/8.x/bottts/svg?seed=${review.user_profile.user.public_id}`).attr("alt", "");
   let clientName = $("<span>").text(`${review.user_profile.first_name} ${review.user_profile.last_name}`);
@@ -218,12 +261,21 @@ function constructReview(review) {
     rating.append($("<li>").append($("<i>").addClass("fa-regular fa-star")));
   }
 
+
+  if (review.user_profile.user.public_id === $("#user_public_id").val()) {
+    let deleteBtn = $("<button>").addClass("btn").html(`<i class="fa-solid fa-trash text-danger"></i>`);
+    deleteBtn.on("click", function () {
+      deleteComment(review.id, reviewItem);
+    });
+    bottom.append(deleteBtn);
+  }
+
   top.append(clientImage, rating);
   let article = $("<article>").addClass("review");
   let reviewText = $("<p>").text(review.content);
   let reviewDate = $("<p>").text(review.created_at);
   article.append(reviewText, reviewDate);
-  reviewItem.append(top, article);
+  reviewItem.append(top, article, bottom);
   return reviewItem;
 }
 
@@ -304,28 +356,29 @@ function constructComment(comment) {
       handleVoteComment(comment.id, "downvote", downvoteNumBadge, upvoteNumBadge);
     });
 
-    let replyDiv = $("<div>").addClass("d-flex flex-row w-100").css("visibility", "hidden");
+    let replyForm = $("<form>").addClass("d-flex flex-row w-100").css("visibility", "hidden");
     let replyInput = $("<input>").attr("type", "text").addClass("form-control mr-3").attr("placeholder", "Add Reply").attr("name", "content").val("");
-    let replySubmitBtn = $("<button>").addClass("btn btn-primary").text("Reply");
+    let replySubmitBtn = $("<button>").addClass("btn btn-primary").attr("type", "submit").text("Reply");
 
-    replySubmitBtn.on("click", function () {
+    replyForm.on("submit", function (e) {
+      e.preventDefault();
       handleReply(replyInput.val(), comment.id, repliesList);
-      replyDiv.css("visibility", "hidden");
+      replyForm.css("visibility", "hidden");
     });
 
-    replyDiv.append(replyInput, replySubmitBtn);
-    commentBox.append(replyDiv);
+    replyForm.append(replyInput, replySubmitBtn);
+    commentBox.append(replyForm);
 
     let replyBtn = $("<button>").addClass("btn").html(`<i class="fa-solid fa-reply"></i>`);
     replyBtn.on("click", function () {
-      replyDiv.css("visibility", replyDiv.css("visibility") === "hidden" ? "visible" : "hidden");
+      replyForm.css("visibility", replyForm.css("visibility") === "hidden" ? "visible" : "hidden");
     });
     commentFoot.append(replyBtn);
 
-    if (comment.user_profile.user.public_id === user_public_id) {
+    if (comment.user_profile.user.public_id === $("#user_public_id").val()) {
       let deleteBtn = $("<button>").addClass("btn").html(`<i class="fa-solid fa-trash text-danger"></i>`);
       deleteBtn.on("click", function () {
-        deleteComment(comment.id);
+        deleteComment(comment.id, commentItem);
       });
       commentFoot.append(deleteBtn);
     }

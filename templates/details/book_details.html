@@ -6,7 +6,7 @@ pico-library{% endblock %} {% block content %} {% block style %}
 />
 {% endblock %}
 
-<div class="container py-5">
+<div class="container py-5 book-detail">
   <div class="row">
     <div class="col-md-4">
       <img
@@ -41,14 +41,21 @@ pico-library{% endblock %} {% block content %} {% block style %}
     <div class="col-md-8 card">
       <div class="card-body">
         <h5 class="card-title">Book Info</h5>
-        <ul class="list-group list-group-flush">
+        <ul class="list-group list-group-flush" id="book-info-list">
           <li class="list-group-item">
+            <h2>Description</h2>
             <p>{{ book_data.description }}</p>
           </li>
 
-          <li class="list-group-item">
-            <h2>Authors</h2>
-            <ul>
+          <li class="list-group-item closed">
+            <div class="d-flex align-items-center justify-content-between">
+              <h2>Authors</h2>
+              <button class="btn li-info-toggle" style="width: fit-content">
+                <i class="fa fa-caret-down caret-down" aria-hidden="true"></i>
+                <i class="fa fa-caret-up caret-up" aria-hidden="true"></i>
+              </button>
+            </div>
+            <ul class="info">
               {% for author in book_data.agents %}
               <li>
                 <div>
@@ -59,26 +66,44 @@ pico-library{% endblock %} {% block content %} {% block style %}
               {% endfor %}
             </ul>
           </li>
-          <li class="list-group-item">
-            <h2>Languages</h2>
-            <ul>
+          <li class="list-group-item closed">
+            <div class="d-flex align-items-center justify-content-between">
+              <h2>Languages</h2>
+              <button class="btn li-info-toggle" style="width: fit-content">
+                <i class="fa fa-caret-down caret-down" aria-hidden="true"></i>
+                <i class="fa fa-caret-up caret-up" aria-hidden="true"></i>
+              </button>
+            </div>
+            <ul class="info">
               {% for language in book_data.languages %}
               <li>{{ language.code }}</li>
               {% endfor %}
             </ul>
           </li>
-          <li class="list-group-item">
-            <h2>Publishers</h2>
-            <ul>
+          <li class="list-group-item closed">
+            <div class="d-flex align-items-center justify-content-between">
+              <h2>Publishers</h2>
+              <button class="btn li-info-toggle" style="width: fit-content">
+                <i class="fa fa-caret-down caret-down" aria-hidden="true"></i>
+                <i class="fa fa-caret-up caret-up" aria-hidden="true"></i>
+              </button>
+            </div>
+            <ul class="info">
               {% for publisher in book_data.publishers %}
               <li>{{ publisher.name }}</li>
               {% endfor %}
             </ul>
           </li>
 
-          <li class="list-group-item">
-            <h2>Subjects</h2>
-            <ul>
+          <li class="list-group-item closed">
+            <div class="d-flex align-items-center justify-content-between">
+              <h2>Subjects</h2>
+              <button class="btn li-info-toggle" style="width: fit-content">
+                <i class="fa fa-caret-down caret-down" aria-hidden="true"></i>
+                <i class="fa fa-caret-up caret-up" aria-hidden="true"></i>
+              </button>
+            </div>
+            <ul class="info">
               {% for subject in book_data.subjects %}
               <li>
                 <a href="/books?subject={{ subject.id }}">{{ subject.name }}</a>
@@ -87,9 +112,15 @@ pico-library{% endblock %} {% block content %} {% block style %}
             </ul>
           </li>
 
-          <li class="list-group-item">
-            <h2>Bookshelves</h2>
-            <ul>
+          <li class="list-group-item closed">
+            <div class="d-flex align-items-center justify-content-between">
+              <h2>Bookshelves</h2>
+              <button class="btn li-info-toggle" style="width: fit-content">
+                <i class="fa fa-caret-down caret-down" aria-hidden="true"></i>
+                <i class="fa fa-caret-up caret-up" aria-hidden="true"></i>
+              </button>
+            </div>
+            <ul class="info">
               {% for bookshelf in book_data.bookshelves %}
               <li>
                 <a href="/books?bookshelf={{ bookshelf.id }}"
@@ -100,9 +131,15 @@ pico-library{% endblock %} {% block content %} {% block style %}
             </ul>
           </li>
 
-          <li class="list-group-item">
-            <h2>Resources</h2>
-            <ul>
+          <li class="list-group-item closed">
+            <div class="d-flex align-items-center justify-content-between">
+              <h2>Resources</h2>
+              <button class="btn li-info-toggle" style="width: fit-content">
+                <i class="fa fa-caret-down caret-down" aria-hidden="true"></i>
+                <i class="fa fa-caret-up caret-up" aria-hidden="true"></i>
+              </button>
+            </div>
+            <ul class="info">
               {% for resource in book_data.resources %}
               <li>
                 <div>

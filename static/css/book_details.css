@@ -30,3 +30,24 @@
 .hit-voting {
   cursor: pointer;
 }
+
+.book-detail .closed .caret-down {
+  display: block;
+}
+.book-detail .closed .caret-up {
+  display: none;
+}
+
+.book-detail .closed .info {
+  display: none;
+}
+
+.book-detail .opened .caret-down {
+  display: none;
+}
+.book-detail .opened .caret-up {
+  display: block;
+}
+.book-detail .opened .info {
+  display: block;
+}
