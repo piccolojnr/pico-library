@@ -1,5 +1,18 @@
 from flask_restx.reqparse import RequestParser
 from flask_restx.inputs import email
+from flask_restx.model import Model
+from flask_restx.fields import String, Boolean
+
+
+user_model = Model(
+    "User",
+    {
+        "email": String,
+        "is_admin": Boolean,
+        "is_email_confirmed": Boolean,
+        "public_id": String,
+    },
+)
 
 
 auth_register_reqparser = RequestParser(bundle_errors=True)

@@ -1,5 +1,10 @@
 {% extends 'layout.html' %} {% block title %} {{ book_data['title'] }} -
-pico-library{% endblock %} {% block content %}
+pico-library{% endblock %} {% block content %} {% block style %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/book_details.css') }}"
+/>
+{% endblock %}
 
 <div class="container py-5">
   <div class="row">
@@ -126,56 +131,34 @@ pico-library{% endblock %} {% block content %}
     <button id="nav-comments-tab" class="nav-link">Comments</button>
   </li>
 </ul>
-<script>
-  $("#nav-reviews-tab").bind("click", function () {
-    var current = $(this).attr("aria-current");
-    if (!current) {
-      $(this).attr("aria-current", "page");
-      $(this).addClass("active");
-
-      $("#nav-comments-tab").removeAttr("aria-current");
-      $("#nav-comments-tab").removeClass("active");
-
-      $("#reviews").addClass("active");
-      $("#reviews").addClass("show");
-
-      $("#comments").removeClass("active");
-      $("#comments").removeClass("show");
-    }
-  });
-  $("#nav-comments-tab").bind("click", function () {
-    var current = $(this).attr("aria-current");
-    if (!current) {
-      $(this).attr("aria-current", "page");
-      $(this).addClass("active");
-
-      $("#nav-reviews-tab").removeAttr("aria-current");
-      $("#nav-reviews-tab").removeClass("active");
-
-      $("#comments").addClass("active");
-      $("#comments").addClass("show");
-
-      $("#reviews").removeClass("active");
-      $("#reviews").removeClass("show");
-    }
-  });
-</script>
 
 <div class="tab-content mt-3">
-  <div class="tab-pane fade show active" id="reviews">
+  <div class="tab-pane fade active show" aria-current="page" id="reviews">
     <!-- Display reviews -->
-    <div id="reviews-content">
-      <!-- Reviews will be dynamically loaded here -->
-      reviews
-    </div>
+    {% include 'components/reviews.html' %}
   </div>
   <div class="tab-pane fade" id="comments">
     <!-- Display comments -->
-    <div id="comments-content">
-      <!-- Comments will be dynamically loaded here -->
-      comments
-    </div>
+
+    {% include 'components/comments.html' %}
   </div>
 </div>
+
+<input
+  type="hidden"
+  id="user_public_id"
+  name="public_id"
+  value="{{ user_data.public_id }}"
+/>
+
+<input type="hidden" id="book_id" name="book_id" value="{{ book_data.id }}" />
+<input
+  type="hidden"
+  id="auth_token"
+  name="auth_token"
+  value="{{ user_data.auth_token }}"
+/>
+
+<script src="{{ url_for('static', filename='js/book_details.js') }}"></script>
 
 {% endblock %}

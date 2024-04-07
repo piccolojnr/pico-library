@@ -5,6 +5,9 @@ from app.models import (
     Book,
     Comment,
     CommentType,
+    CommentVote,
+    CommentVoteType,
+    Rating,
 )
 from flask_restx import abort, marshal
 from http import HTTPStatus
@@ -17,7 +20,7 @@ from app.api.v1.comments.dto import (
 from app import db
 
 
-def process_user_comment_post(content, book_id, parent_id, comment_type):
+def process_user_comment_post(content, book_id, parent_id, comment_type, rating):
     public_id = current_token.sub
     user: User = User.find_by_public_id(public_id)
 
@@ -47,6 +50,16 @@ def process_user_comment_post(content, book_id, parent_id, comment_type):
         book: Book = Book.get_by_id(book_id)
         if not book:
             abort(HTTPStatus.NOT_FOUND, "Book not found")
+    else:
+        if rating:
+            exrating = Rating.query.filter_by(user_id=user.id).first()
+            if exrating:
+                exrating.rating = rating
+                db.session.commit()
+            else:
+                new_rating = Rating(user_id=user.id, rating=rating, book_id=book_id)
+                db.session.add(new_rating)
+                db.session.commit()
 
     if parent_id:
         parent_comment: Comment = Comment.get_by_id(parent_id)
@@ -59,7 +72,9 @@ def process_user_comment_post(content, book_id, parent_id, comment_type):
         book_id=book_id if book_id else None,
         parent_id=parent_id if parent_id else None,
         type=comment_type,
+        rating=rating,
     )
+
     db.session.add(comment)
     db.session.commit()
 
@@ -99,7 +114,9 @@ def process_retrieve_user_comments(
         "book_id": book_id,
         "type": comment_type,
     }
-    query = Comment.query.filter_by(**{k: v for k, v in query_filter.items() if v})
+    query = Comment.query.filter_by(
+        **{k: v for k, v in query_filter.items() if v}
+    ).order_by(Comment.created_at.desc())
 
     comments_pagination = query.paginate(page=page, per_page=per_page)
     pagination = dict(
@@ -154,3 +171,39 @@ def process_update_comment(comment_id, content):
         "status": "success",
         "message": f"Comment with ID {comment_id} was successfully updated.",
     }
+
+
+def process_vote_comment(comment_id, vote_type):
+    comment = Comment.get_by_id(comment_id)
+    if not comment:
+        abort(HTTPStatus.NOT_FOUND, "Comment not found")
+    public_id = current_token.sub
+    user = User.find_by_public_id(public_id)
+    if not user:
+        abort(HTTPStatus.NOT_FOUND, "User not found")
+
+    vote_type = vote_type.upper()
+    if vote_type not in CommentVoteType.__members__:
+        abort(HTTPStatus.BAD_REQUEST, "Invalid vote type")
+
+    vote_type = CommentVoteType[vote_type]
+
+    comment_vote = CommentVote.query.filter(
+        CommentVote.comment_id == comment_id, CommentVote.user_id == user.id
+    ).first()
+    if comment_vote:
+        if comment_vote.vote == vote_type:
+            abort(HTTPStatus.BAD_REQUEST, "User already voted for this comment")
+        else:
+            db.session.delete(comment_vote)
+            db.session.commit()
+
+    comment_vote = CommentVote(comment_id=comment_id, user_id=user.id, vote=vote_type)
+    db.session.add(comment_vote)
+    db.session.commit()
+    return jsonify(
+        status="success",
+        upvotes=comment.upvotes,
+        downvotes=comment.downvotes,
+        message=f"Comment with ID {comment_id} was successfully {vote_type}.",
+    )

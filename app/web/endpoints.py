@@ -240,17 +240,24 @@ def bookshelf_listings():
 
 
 # Book Details
-@web_bp.route("/books/<int:book_id>")
+@web_bp.route("/books/<int:book_id>", endpoint="book_details", methods=["GET", "POST"])
 def book_details(book_id):
 
     book_data = get_resource(f"api/v1/books/{book_id}")
 
-    # Logic to fetch and display book details for the given book_id
+    is_logged_in_ = is_logged_in()
+    user_data = None
+    if is_logged_in_:
+        url = url_for("api.auth_user")
+        user_data = get_auth_resource(url)
+        user_data["auth_token"] = session["auth_token"]
+
     return render_template(
         "details/book_details.html",
         book_id=book_id,
         book_data=book_data,
-        is_logged_in=is_logged_in(),
+        user_data=user_data,
+        is_logged_in=is_logged_in_,
     )
 
 
@@ -389,7 +396,6 @@ def forgot_password():
         data["token"] = token
         url = url_for("api.auth_change_password")
         response = requests.put(base_url + url, data=data)
-        print(response.json())
         if response.status_code == 200:
             return redirect(url_for("site.login"))
         else:

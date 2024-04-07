@@ -7,6 +7,7 @@ from app.api.v1.comments.business import (
     process_delete_comment,
     process_update_comment,
     process_retrieve_specific_comment,
+    process_vote_comment,
 )
 from http import HTTPStatus
 from app.api.v1.comments.dto import (
@@ -14,6 +15,7 @@ from app.api.v1.comments.dto import (
     retrieve_comments_reqparse,
     comment_pagination_model,
     pagination_links_model,
+    vote_comment_req_parse,
 )
 
 comments_ns = Namespace(name="comments", validate=True)
@@ -37,7 +39,8 @@ class CommentsResource(Resource):
         book_id = data.get("book_id")
         parent_id = data.get("parent_id")
         type = data.get("type")
-        return process_user_comment_post(content, book_id, parent_id, type)
+        rating = data.get("rating")
+        return process_user_comment_post(content, book_id, parent_id, type, rating)
 
     @comments_ns.expect(retrieve_comments_reqparse)
     def get(self):
@@ -71,3 +74,13 @@ class CommentResource(Resource):
 
     def delete(self, comment_id):
         return process_delete_comment(comment_id)
+
+
+@comments_ns.route("/vote/<int:comment_id>", endpoint="vote_comment")
+class CommentVote(Resource):
+    @require_token()
+    @comments_ns.expect(vote_comment_req_parse)
+    def post(self, comment_id):
+        args = vote_comment_req_parse.parse_args()
+        vote_type = args.get("vote_type")
+        return process_vote_comment(comment_id, vote_type)

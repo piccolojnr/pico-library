@@ -16,9 +16,33 @@ from app.api.v1.auth.dto import (
     auth_login_reqparser,
     auth_change_password_reqparser,
     auth_send_forgot_password_reqparser,
+    user_model,
 )
 
 auth_ns = Namespace(name="auth", validate=True)
+
+
+@auth_ns.route("/", endpoint="auth_user")
+class AuthUser(Resource):
+    @require_token()
+    @auth_ns.response(HTTPStatus.OK, "User logged in successfully")
+    @auth_ns.response(HTTPStatus.BAD_REQUEST, "Bad request")
+    @auth_ns.response(HTTPStatus.CONFLICT, "User already exists")
+    @auth_ns.response(HTTPStatus.INTERNAL_SERVER_ERROR, "Internal server error")
+    @auth_ns.response(HTTPStatus.UNAUTHORIZED, "Unauthorized")
+    @auth_ns.response(HTTPStatus.NOT_FOUND, "Not found")
+    @auth_ns.doc(description="Login a user")
+    @auth_ns.doc(security="Bearer")
+    @auth_ns.marshal_with(user_model)
+    def get(self):
+        from app.models import User
+
+        public_id = current_token.sub
+
+        user = User.find_by_public_id(public_id)
+        if not user:
+            abort(HTTPStatus.NOT_FOUND, "User not found")
+        return user
 
 
 @auth_ns.route("/register", endpoint="auth_register")

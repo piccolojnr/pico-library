@@ -1,0 +1,62 @@
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/comments.css') }}"
+/>
+<div id="comments-content">
+  <!-- Comments will be dynamically loaded here -->
+  {% if is_logged_in %}
+  <form
+    style="border: 1px solid #ccc; border-radius: 5px; padding: 20px"
+    id="comment-form"
+  >
+    <img
+      class="img-fluid img-responsive rounded-circle mr-2"
+      src="https://api.dicebear.com/8.x/bottts/svg?seed={{ user_data.public_id }}"
+      width="108"
+    />
+    <div class="form-group mb-4">
+      <label for="content" style="display: block; font-weight: bold"
+        >Your Comment:</label
+      >
+      <input
+        type="text"
+        class="form-control mr-3"
+        id="add-comment-value"
+        placeholder="Add comment"
+        style="
+          width: 100%;
+          padding: 10px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+        "
+        name="content"
+      />
+    </div>
+    <input type="hidden" name="type" value="comment" />
+    <button
+      style="
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      "
+      type="submit"
+      class="btn btn-primary"
+    >
+      Comment
+    </button>
+  </form>
+
+  {% endif %}
+  <!-- comments -->
+  <div class="comments-container">
+    <ul id="comments-list" class="comments-list"></ul>
+    <div class="d-flex justify-content-center">
+      <button class="btn border" id="load-more-comments-btn">Load More</button>
+    </div>
+  </div>
+</div>

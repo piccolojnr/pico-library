@@ -17,7 +17,7 @@ def calculate_review_score(book: Book):
     total_score = 0
     total_votes = 0
     for review in reviews:
-        total_score += review.average_rating * (
+        total_score += review.rating * (
             review.upvotes() - review.downvotes()
         )  # Consider both rating and svotes
         total_votes += review.upvotes() + review.downvotes()
@@ -62,7 +62,7 @@ def calculate_score(user: User, book: Book):
         score += bookshelf.score
 
     # Incorporate other factors into the score calculation, such as average rating
-    if book.average_rating:
-        score += book.average_rating
+    if book.rating:
+        score += book.rating
 
     return score

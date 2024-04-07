@@ -69,13 +69,13 @@ class Comment(db.Model):
     book_id = db.Column(db.Integer, db.ForeignKey("books.id", ondelete="CASCADE"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"))
     parent_id = db.Column(db.Integer, db.ForeignKey("comments.id", ondelete="CASCADE"))
+    rating = db.Column(db.Float, nullable=True)
 
     book = db.relationship("Book", back_populates="comments")
     user = db.relationship("User", back_populates="comments")
     parent = db.relationship("Comment", remote_side=[id], back_populates="replies")
     replies = db.relationship("Comment", back_populates="parent")
     comment_votes = db.relationship("CommentVote", back_populates="comment")
-    ratings = db.relationship("Rating", back_populates="review")
 
     @hybrid_property
     def type_str(self):
@@ -104,13 +104,6 @@ class Comment(db.Model):
                 if vote.vote == CommentVoteType.DOWNVOTE
             ]
         )
-
-    @hybrid_property
-    def average_rating(self):
-        if not self.ratings:
-            return 0
-        ratings = [rating.rating for rating in self.ratings]
-        return sum(ratings) / len(ratings)
 
     @hybrid_property
     def created_at_str(self):

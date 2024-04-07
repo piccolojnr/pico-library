@@ -13,7 +13,7 @@ comment_model = Model(
         "user_profile": Nested(short_profile_model),
         "book_id": Integer,
         "parent_id": Integer,
-        "average_rating": Float,
+        "rating": Float,
         "upvotes": Integer,
         "downvotes": Integer,
         "number_of_replies": Integer,
@@ -59,4 +59,9 @@ retrieve_comments_reqparse.add_argument(
 )
 retrieve_comments_reqparse.add_argument(
     "per_page", type=positive, default=10, required=False
+)
+
+vote_comment_req_parse = RequestParser(bundle_errors=True)
+vote_comment_req_parse.add_argument(
+    "vote_type", type=str, choices=["upvote", "downvote"], default="upvote"
 )
