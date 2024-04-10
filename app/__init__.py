@@ -29,6 +29,7 @@ def start_scheduler():
 
 def create_app(config_name):
     app = Flask("pico-library-api")
+    app.debug = False
     app.config.from_object(get_config(config_name))
 
     from app.api.v1 import api_bp
@@ -63,5 +64,5 @@ def create_app(config_name):
     def internal_server_error(error):
         return render_template("errors/500.html"), 500
 
-    start_scheduler()
+    # start_scheduler()
     return app
