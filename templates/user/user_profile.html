@@ -1,5 +1,9 @@
 {% extends 'layout.html' %} {% block title %}profile - pico-library{% endblock
 %} {% block content %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/user_profile.css') }}"
+/>
 <div class="container mt-5">
   <div class="row justify-content-center">
     <div class="col-md-8">
@@ -172,6 +176,143 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<nav class="nav nav-tabs nav-stacked mt-4">
+  <li class="nav-item" role="presentation">
+    <button
+      class="nav-link active"
+      id="bookmarks-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#bookmarks-tab-pane"
+      type="button"
+      role="tab"
+      aria-controls="bookmarks-tab-pane"
+      aria-selected="true"
+    >
+      Bookmarks
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button
+      class="nav-link"
+      id="subjects-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#subjects-tab-pane"
+      type="button"
+      role="tab"
+      aria-controls="subjects-tab-pane"
+      aria-selected="false"
+    >
+      favorite subjects
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button
+      class="nav-link"
+      id="bookshelves-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#bookshelves-tab-pane"
+      type="button"
+      role="tab"
+      aria-controls="bookshelves-tab-pane"
+      aria-selected="false"
+    >
+      my bookshelves
+    </button>
+  </li>
+</nav>
+<div class="tab-content">
+  <div
+    id="bookmarks-tab-pane"
+    class="tab-pane fade show active"
+    role="tabpanel"
+    aria-labelledby="bookmarks-tab"
+    tabindex="0"
+  >
+    <div
+      style="width: 100%"
+      class="d-flex align-items-center justify-content-center"
+    >
+      <nav
+        class="nav nav-tabs nav-stacked mt-4 d-flex align-items-center justify-content-center"
+        style="width: fit-content"
+      >
+        <li class="nav-item" role="presentation">
+          <button data-bs-toggle="tab" class="nav-link active" data-value="all">
+            all
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            data-bs-toggle="tab"
+            class="nav-link"
+            data-value="currently_reading"
+          >
+            currently reading
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button data-bs-toggle="tab" class="nav-link" data-value="read">
+            read
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button data-bs-toggle="tab" class="nav-link" data-value="unread">
+            unread
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            data-bs-toggle="tab"
+            class="nav-link"
+            data-value="want_to_read"
+          >
+            want to read
+          </button>
+        </li>
+      </nav>
+    </div>
+    <div
+      class="d-flex flex-row flex-wrap align-items-center justify-content-center gap-4 mt-4"
+    >
+      {% for i in [1,2,3,4,5,6] %}
+      <div
+        class="card text-left d-flex flex-row align-items-center justify-content-between mt-4"
+        style="max-width: 500; min-width: 400px"
+      >
+        <img
+          class="card-img-top"
+          src="https://api.dicebear.com/8.x/bottts/svg?seed={{ profile_data.user.public_id }}"
+          alt=""
+          style="width: 100px"
+        />
+        <div class="card-body">
+          <h4 class="card-title">Title</h4>
+          <p class="card-text">Body</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div
+    id="subjects-tab-pane"
+    class="tab-pane fade"
+    role="tabpanel"
+    aria-labelledby="subjects-tab"
+    tabindex="0"
+  >
+    Subjects
+  </div>
+  <div
+    id="bookshelves-tab-pane"
+    class="tab-pane fade"
+    role="tabpanel"
+    aria-labelledby="bookshelves-tab"
+    tabindex="0"
+  >
+    bookshelves
   </div>
 </div>
 

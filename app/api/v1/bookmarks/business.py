@@ -42,8 +42,18 @@ def process_create_bookmark(book_id, status):
     return response, response_status_code, response_headers
 
 
-def process_delete_bookmark(bookmark_id):
-    bookmark = Bookmark.query.filter_by(id=bookmark_id).first()
+def process_delete_bookmark(book_id):
+    public_id = current_token.sub
+    user = User.find_by_public_id(public_id)
+    if not user:
+        abort(HTTPStatus.NOT_FOUND, message=f"User not found")
+    book = Book.query.filter_by(id=book_id).first()
+    if not book:
+        abort(HTTPStatus.NOT_FOUND, message=f"Book not found")
+
+    bookmark = Bookmark.query.filter(
+        Bookmark.book_id == book_id, Bookmark.user_id == user.id
+    ).first()
     if bookmark:
         db.session.delete(bookmark)
         db.session.commit()
@@ -52,8 +62,18 @@ def process_delete_bookmark(bookmark_id):
         abort(HTTPStatus.NOT_FOUND, "Bookmark not found")
 
 
-def process_update_bookmark(bookmark_id, status):
-    bookmark = Bookmark.query.filter(Bookmark.id == bookmark_id).first()
+def process_update_bookmark(book_id, status):
+    public_id = current_token.sub
+    user = User.find_by_public_id(public_id)
+    if not user:
+        abort(HTTPStatus.NOT_FOUND, message=f"User not found")
+    book = Book.query.filter_by(id=book_id).first()
+    if not book:
+        abort(HTTPStatus.NOT_FOUND, message=f"Book not found")
+
+    bookmark = Bookmark.query.filter(
+        Bookmark.book_id == book_id, Bookmark.user_id == user.id
+    ).first()
     if not bookmark:
         abort(HTTPStatus.NOT_FOUND, "Bookmark not found")
 
@@ -73,8 +93,18 @@ def process_update_bookmark(bookmark_id, status):
     return response, response_status_code
 
 
-def process_get_bookmark(bookmark_id):
-    bookmark = Bookmark.query.filter(Bookmark.id == bookmark_id).first()
+def process_get_bookmark(book_id):
+    public_id = current_token.sub
+    user = User.find_by_public_id(public_id)
+    if not user:
+        abort(HTTPStatus.NOT_FOUND, message=f"User not found")
+    book = Book.query.filter_by(id=book_id).first()
+    if not book:
+        abort(HTTPStatus.NOT_FOUND, message=f"Book not found")
+
+    bookmark = Bookmark.query.filter(
+        Bookmark.book_id == book_id, Bookmark.user_id == user.id
+    ).first()
     if bookmark:
         return bookmark
     else:

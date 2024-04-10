@@ -36,7 +36,7 @@ def process_get_subjects(page=1, per_page=10, q=None):
     filter_conditions = []
 
     if q:
-        filter_conditions.append(Subject.name.like(f"%{q}%"))
+        filter_conditions.append(Subject.name.ilike(f"%{q}%"))
 
     if filter_conditions:
         subjects = (

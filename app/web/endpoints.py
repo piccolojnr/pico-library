@@ -8,7 +8,12 @@ from flask import session
 
 def get_resource(api_url):
     base_url = request.url_root
-    response = requests.get(base_url + api_url)
+    headers = {
+        "Authorization": (
+            "Bearer " + session["auth_token"] if "auth_token" in session else ""
+        ),
+    }
+    response = requests.get(base_url + api_url, headers=headers)
     if response.status_code == 200:
         return response.json()
     elif response.status_code == 404:
@@ -79,7 +84,6 @@ def index():
 def book_listings():
     # Get parameters
     page = request.args.get("page", 1, type=int)
-    lan = request.args.get("lan", None, type=str)
     q = request.args.get("q", None, type=str)
     agent_id = request.args.get("agent", None, type=str)
     subject_id = request.args.get("subject", None, type=str)
@@ -107,14 +111,13 @@ def book_listings():
     )
     breadcrumbs = [b for b in breadcrumbs if b]  # Remove None values
 
-    lan_ = f"&lan={lan}" if lan and lan != "all" else ""
     q_ = f"&q={q}" if q else ""
     agent_id = f"&agent={agent_id}" if agent_id else ""
     subject_id = f"&subject={subject_id}" if subject_id else ""
     bookshelf_id = f"&bookshelf={bookshelf_id}" if bookshelf_id else ""
     # Get pagination data
     pagination = get_resource(
-        f"api/v1/books?page={page}&per_page=10{lan_}{q_}{agent_id}{subject_id}{bookshelf_id}"
+        f"api/v1/books?page={page}&per_page=10{q_}{agent_id}{subject_id}{bookshelf_id}"
     )
     languages = get_resource("api/v1/languages")
 
@@ -125,8 +128,6 @@ def book_listings():
         "listings/book_listings.html",
         is_logged_in=is_logged_in(),
         pagination=pagination,
-        languages=languages,
-        lan=lan,
         breadcrumbs=breadcrumbs,
     )
 
@@ -255,7 +256,7 @@ def book_details(book_id):
     return render_template(
         "details/book_details.html",
         book_id=book_id,
-        book_data=book_data,
+        book_data=book_data["item"],
         user_data=user_data,
         is_logged_in=is_logged_in_,
     )
@@ -309,11 +310,12 @@ def login():
 
         url = url_for("api.auth_login")
         response = requests.post(base_url + url, data=data)
-        session["auth_token"] = response.json()["auth"]["auth_token"]
-        session["refresh_token"] = response.json()["auth"]["refresh_token"]
         if response.status_code == 200:
+            session["auth_token"] = response.json()["auth"]["auth_token"]
+            session["refresh_token"] = response.json()["auth"]["refresh_token"]
             return redirect(url_for("site.index"))
         else:
+            print(response.json())
             return render_template(
                 "authentication/login.html",
                 is_logged_in=is_logged_in(),

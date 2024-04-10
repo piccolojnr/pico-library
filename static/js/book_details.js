@@ -5,9 +5,20 @@ $(document).ready(function () {
       $(li).toggleClass("closed");
       $(li).toggleClass("opened");
     })
-
   }
 
+  for (const li of $("#bookmark-select-menu").children()) {
+    $(li).find(".btn").on("click", function () {
+      if ($(this).attr("data-value") === "remove")
+        handleRemoveBookFromBookmark()
+      else
+        handleAddBookToBookmark($(this).attr("data-value"))
+    })
+
+  }
+  if ($("#bookmarked").val()) {
+    $("#bookmark-select-btn").on("click", handleRemoveBookFromBookmark)
+  }
   // Event Handlers
   $("#nav-reviews-tab").on("click", handleReviewsTabClick);
   $("#nav-comments-tab").on("click", handleCommentsTabClick);
@@ -15,6 +26,7 @@ $(document).ready(function () {
   $("#comment-form").on("submit", handleCommentFormSubmit);
   $("#load-more-comments-btn").on("click", handleLoadMoreCommentsClick);
   $("#load-more-reviews-btn").on("click", handleLoadMoreReviewsClick);
+  // $("#add-bookmark-btn").on("click", handleAddBookToBookmark)
 
   // Initial Load of Comments and Reviews
   loadInitialCommentsAndReviews();
@@ -46,7 +58,51 @@ function handleLoadMoreReviewsClick() {
   LoadMoreReviews()
 }
 
+function handleAddBookToBookmark(status) {
+  $.ajax({
+    url: "/api/v1/bookmarks/",
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + $("#auth_token").val(),
+      'Content-Type': 'application/json'
+    },
+    data: JSON.stringify({
+      "book_id": $("#book_id").val(),
+      "status": status
+    })
+    ,
+    success: function (data) {
+      $("#bookmark-select-btn").empty()
+      $("#bookmark-select-btn").append($("<i>").addClass('fas fa-trash'))
+      $("#bookmark-select-btn").attr("data-value", "remove")
+      $("#bookmark-select-btn").removeClass("dropdown-toggle");
+      $("#bookmark-select-btn").on("click", handleRemoveBookFromBookmark)
+    },
+    error: function (err) {
+      console.log(err.responseJSON);
+    }
+  });
+}
+function handleRemoveBookFromBookmark() {
+  $.ajax({
+    url: "/api/v1/bookmarks/" + $("#book_id").val(),
+    method: 'DELETE',
+    headers: {
+      'Authorization': 'Bearer ' + $("#auth_token").val(),
+      'Content-Type': 'application/json'
+    },
+    success: function (data) {
+      $("#bookmark-select-btn").empty()
+      $("#bookmark-select-btn").append($("<i>").addClass('fas fa-bookmark'))
+      $("#bookmark-select-btn").addClass("dropdown-toggle");
+      $("#bookmark-select-btn").attr("data-value", "add")
 
+    },
+    error: function (err) {
+      console.log(err.responseJSON);
+    }
+  });
+}
 // Tab click handler
 function handleTabClick(clickedTab, otherTab, activeContent, inactiveContent) {
   const current = clickedTab.attr("aria-current");

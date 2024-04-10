@@ -7,7 +7,7 @@
 
 import datetime
 import pandas as pd
-from app.v1.models import (
+from app.models import (
     Publisher,
     Resource,
     ResourceType,
@@ -18,7 +18,7 @@ from app.v1.models import (
     Book,
     Subject,
 )
-from app.v1 import db, create_app
+from app import db, create_app
 from tqdm import tqdm
 import sys
 import argparse
@@ -233,5 +233,5 @@ if __name__ == "__main__":
     if not file_path:
         print("Please provide an input file.")
         sys.exit(1)
-    
+
     start_seeding(flask_env, file_path, num)

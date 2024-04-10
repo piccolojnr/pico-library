@@ -8,14 +8,16 @@ from app.models import (
     Bookshelf,
     Language,
     Publisher,
+    Bookmark,
 )
 from flask_restx import abort, marshal
 from http import HTTPStatus
 from app.services.recommendation_engine import generate_recommendations
-from flask import jsonify, url_for
+from flask import jsonify, url_for, request
 from app.api.v1.books.dto import book_pagination_model, book_model
 from app import db
 from app.utils.functions import add_resources
+from app import auth_manager
 
 
 def get_languages(language_ids):
@@ -169,8 +171,39 @@ def process_get_books(
 
 def process_get_book(book_id):
     book = Book.query.filter_by(id=book_id).first()
+
     if book:
-        return book
+        book_data = marshal(book, book_model)
+        response = {
+            "status": "success",
+            "message": "Book found successfully",
+            "item": book_data,
+            "bookmark": {
+                "bookmarked": False,
+                "status": None,
+            },
+        }
+        current_token = (
+            request.headers["Authorization"].replace("Bearer ", "")
+            if "Authorization" in request.headers
+            else None
+        )
+        current_token = (
+            auth_manager.convert_token(current_token) if current_token else None
+        )
+        public_id = current_token.sub if current_token else None
+        if public_id:
+            user: User = User.find_by_public_id(public_id)
+            if user:
+                user_id = user.id
+                book_bookmark = Bookmark.query.filter(
+                    Bookmark.user_id == user_id, Bookmark.book_id == book_id
+                ).first()
+                if book_bookmark:
+                    response["item"]["bookmarked"] = True
+                    response["item"]["bookmark_status"] = book_bookmark.status_str
+
+        return response
     else:
         abort(HTTPStatus.NOT_FOUND, "Book not found")
 

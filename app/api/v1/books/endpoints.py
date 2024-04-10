@@ -71,8 +71,6 @@ class BooksResource(Resource):
 
 @books_ns.route("/<book_id>", endpoint="book")
 class BookResource(Resource):
-
-    @books_ns.marshal_with(book_model)
     def get(self, book_id):
         """
         Get book by id.

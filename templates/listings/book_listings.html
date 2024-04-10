@@ -36,24 +36,6 @@
 
   <h1 class="mb-4">Books</h1>
   <!-- filtering by language -->
-  <select
-    class="form-select mb-4"
-    aria-label="languages"
-    id="language-select"
-    style="width: fit-content !important"
-  >
-    <option value="all">all</option>
-
-    {% for language in languages['items'] %}
-    <option value="{{ language.code }}">{{ language.code }}</option>
-    {% endfor %}
-  </select>
-  <input
-    type="hidden"
-    name="language"
-    id="language-selected-code"
-    value="{{ lan }}"
-  />
 
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     {% for book in pagination['items'] %}

@@ -16,7 +16,67 @@ pico-library{% endblock %} {% block content %} {% block style %}
       />
       <div class="card">
         <div class="card-body">
-          <h5 class="card-title">Book Details</h5>
+          <div class="d-flex align-items-center justify-content-between">
+            <h5 class="card-title">Book Details</h5>
+            {% if is_logged_in %}
+            <input
+              type="hidden"
+              name="bookmarked"
+              id="bookmarked"
+              value="{{ book_data.bookmarked }}"
+            />
+            <div class="dropdown">
+              <button
+                class="btn btn-secondary {% if not book_data.bookmarked %} dropdown-toggle {% endif %}"
+                type="button"
+                {%if
+                not
+                book_data.bookmarked%}
+                data-bs-toggle="dropdown"
+                {%else%}
+                data-toggle="tooltip"
+                data-placement="top"
+                title="remove from bookmark {{ book_data.bookmark_status }}"
+                {%endif%}
+                id="bookmark-select-btn"
+                aria-expanded="false"
+                data-value="{% if not book_data.bookmarked %}add{% else %}remove{% endif %}"
+              >
+                {% if not book_data.bookmarked %}
+                <i class="fa fa-bookmark" aria-hidden="true"></i>
+                {% else %}
+                <i class="fa fa-trash" aria-hidden="true"></i>
+                {% endif %}
+              </button>
+              <ul class="dropdown-menu" id="bookmark-select-menu">
+                <li>
+                  <button type="button" class="btn" data-value="read">
+                    read
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="btn" data-value="want_to_read">
+                    want to read
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    class="btn"
+                    data-value="currently_reading"
+                  >
+                    currently reading
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="btn" data-value="unread">
+                    unread
+                  </button>
+                </li>
+              </ul>
+            </div>
+            {% endif %}
+          </div>
           <ul class="list-group list-group-flush">
             <li class="list-group-item">
               <strong>Title:</strong> {{ book_data.title }}
